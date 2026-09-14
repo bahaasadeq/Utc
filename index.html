@@ -191,17 +191,18 @@
       <p>بوابة الدخول الموحدة للمنظومة</p>
       <form onsubmit="handleLogin(event)">
         <!-- خانة رمز الشركة (لضمان عزل البيانات بين الشركات) -->
-        <input type="text" id="login-code" class="input-field" placeholder="رمز الشركة (فارغ للمالك)" autocomplete="off">
-        <input type="text" id="login-user" class="input-field" placeholder="اسم المستخدم أو الرقم السريع" autocomplete="off" required>
-        <input type="password" id="login-pass" class="input-field" placeholder="كلمة المرور" required>
+        <input type="text" id="login-code" class="input-field" placeholder="Company Code / رمز الشركة (فارغ للمالك)" autocomplete="off">
+        <input type="text" id="login-user" class="input-field" placeholder="User Name / اسم المستخدم أو الرقم السريع" autocomplete="off" required>
+        <input type="password" id="login-pass" class="input-field" placeholder="Password / كلمة المرور" required>
         
         <button type="submit" class="btn-auth">دخول آمن (Login)</button>
-        <button type="button" class="btn-secondary-auth" onclick="showRegisterScreen()">طلب تسجيل شركة جديدة (SaaS)</button>
+        <button type="button" class="btn-secondary-auth" onclick="showRegisterScreen()">طلب تسجيل شركة جديدة (SaaS Request)</button>
         
-        <div id="login-error" class="error-msg">البيانات غير صحيحة أو ليس لديك صلاحية!</div>
+        <div id="login-error" class="error-msg">البيانات غير صحيحة أو الترخيص معطل!</div>
         
+        <!-- معلومات الدعم الفني المطلوبة -->
         <div class="contact-footer">
-          للتواصل والدعم الفني للإدارة العليا:<br>
+          للتواصل والدعم الفني :<br>
           🇯🇴 +962799758747<br>
           bahaa.s.jod@gmail.com
         </div>
@@ -268,6 +269,7 @@
           <button class="btn btn-danger" onclick="logout()">خروج</button>
         </div>
         
+        <!-- خانة البحث الشاملة -->
         <div class="global-search-container">
           <input type="text" class="global-search-input" placeholder="🔍 بحث شامل عن موظف (بالاسم أو الرقم)..." onkeyup="performGlobalSearch(this)">
           <div class="search-results-dropdown"></div>
@@ -279,15 +281,20 @@
         <section id="master-licenses" class="view-section active">
           <div class="card" style="border-top: 4px solid var(--primary-master);">
             <div class="card-title">إصدار ترخيص (SaaS) جديد لشركة</div>
-            <p style="font-size:0.9rem; color:var(--text-muted); margin-bottom:15px;">سيقوم النظام تلقائياً بإنشاء "رمز للشركة" و"اسم دخول" خاصين بها لعزل بياناتها كلياً.</p>
+            <p style="font-size:0.9rem; color:var(--text-muted); margin-bottom:15px;">قم بتعبئة بيانات الشركة، ويمكنك تعديل رمز الشركة وكلمة المرور يدوياً. هذا الرمز سيُستخدم لدخول جميع موظفيها لمنع التداخل.</p>
             <div class="grid-2">
-              <div class="form-group"><label>اسم الشركة العميل</label><input type="text" id="new-company-name" class="input-field"></div>
+              <div class="form-group"><label>اسم الشركة العميل <span class="req">*</span></label><input type="text" id="new-company-name" class="input-field"></div>
               <div class="form-group">
-                <label>مدة الترخيص</label>
+                <label>مدة الترخيص <span class="req">*</span></label>
                 <select id="new-license-duration" class="input-field">
                   <!-- الخيارات تدار برمجياً حسب الصلاحيات -->
                 </select>
               </div>
+            </div>
+            <!-- خانات التعديل اليدوي للرمز السري وكلمة المرور -->
+            <div class="grid-2">
+              <div class="form-group"><label>رمز الشركة (آلي وقابل للتعديل) <span class="req">*</span></label><input type="text" id="new-company-code" class="input-field" required></div>
+              <div class="form-group"><label>كلمة مرور مدير الـ HR (قابلة للتعديل) <span class="req">*</span></label><input type="text" id="new-company-pass" class="input-field" value="123456" required></div>
             </div>
             <button class="btn btn-master" onclick="generateAndSaveLicense()">➕ توليد وحفظ الترخيص وإصدار بيانات الدخول</button>
           </div>
@@ -426,6 +433,7 @@
           </div>
         </div>
 
+        <!-- خانة البحث الشاملة (المعزولة للشركة) -->
         <div class="global-search-container">
           <input type="text" class="global-search-input" placeholder="🔍 بحث عن موظف (الاسم، الرقم الوظيفي، الرقم الوطني)..." onkeyup="performGlobalSearch(this)">
           <div class="search-results-dropdown"></div>
@@ -451,7 +459,7 @@
           </div>
         </section>
 
-        <!-- الإعدادات -->
+        <!-- الإعدادات (الأقسام + البنوك المطورة) -->
         <section id="hr-settings" class="view-section">
           <div class="alert-box">⚙️ قم بتعريف الأقسام، المسميات الوظيفية، ودليل البنوك الخاص بشركتك لاستخدامها في ملف الموظف. كل شركة لها إعداداتها المعزولة والخاصة بها.</div>
           <div class="grid-2">
@@ -471,6 +479,7 @@
               <div id="list-jobTitles" style="min-height: 80px;"></div>
             </div>
             
+            <!-- دليل البنوك والرموز المطور -->
             <div class="card" style="margin-bottom: 0;">
               <h4 style="margin-bottom: 15px; color: var(--sidebar-hr);">دليل البنوك والرموز</h4>
               <div style="display: flex; gap: 5px; margin-bottom: 15px;">
@@ -489,22 +498,22 @@
             <div class="card-title">إضافة موظف جديد شامل (قاعدة البيانات)</div>
             <div class="alert-box" style="background:#eff6ff; border-color:#bfdbfe; color:#1e40af;">
               💡 <strong>تنبيه:</strong> الحقول التي بجانبها نجمة حمراء (<span class="req">*</span>) إجبارية. 
-              <br>🔑 <strong>الترميز المفتوح:</strong> يمكنك التعديل يدوياً على الرقم الوظيفي المولد، ورقم الدخول السريع. سيرفض النظام أي رقم مكرر.
+              <br>🔑 <strong>تعديل الرقم الوظيفي والدخول السريع:</strong> يمكنك التعديل يدوياً على الرقم الوظيفي المولد، ورقم الدخول السريع. سيرفض النظام أي رقم سريع مكرر لضمان عدم تداخل دخول الموظفين.
             </div>
             
             <form id="employee-form" onsubmit="saveNewEmployee(event)">
-              <!-- القسم 1: الهيكلة والدخول الذكي معدل بناء على الطلب الأخير -->
-              <h4 style="color: var(--sidebar-hr); border-bottom: 1px solid var(--border); padding-bottom: 5px; margin-bottom: 15px;">1. الهيكل الإداري والترميز الوظيفي</h4>
+              <!-- القسم 1: الهيكلة والدخول الذكي -->
+              <h4 style="color: var(--sidebar-hr); border-bottom: 1px solid var(--border); padding-bottom: 5px; margin-bottom: 15px;">1. الهيكل الإداري وبيانات الدخول</h4>
               <div class="grid-4">
                 <div class="form-group"><label>القسم الرئيسي <span class="req">*</span></label><select id="emp-main-dept" class="input-field" onchange="generateEmpId()" required></select></div>
                 <div class="form-group"><label>القسم الفرعي <span class="req">*</span></label><select id="emp-sub-dept" class="input-field" onchange="generateEmpId()" required></select></div>
                 <div class="form-group"><label>المسمى الوظيفي <span class="req">*</span></label><select id="emp-job-title" class="input-field" required></select></div>
                 
-                <!-- الرقم الوظيفي قابل للتعديل اليدوي، يولد تلقائيا ويمكن مسحه -->
+                <!-- الرقم الوظيفي قابل للتعديل -->
                 <div class="form-group"><label>الرقم الوظيفي <span class="req">*</span></label><input type="text" id="emp-id" class="input-field" style="font-weight:bold; color:var(--primary-hr);" required></div>
               </div>
               <div class="grid-4">
-                <!-- رقم الدخول السريع قابل للتعديل اليدوي بدون readonly -->
+                <!-- رقم الدخول السريع قابل للتعديل يدوياً -->
                 <div class="form-group"><label>رقم الدخول السريع (للموظف) <span class="req">*</span></label><input type="text" id="emp-short-id" class="input-field" title="رقم مختصر لدخول الموظف من هاتفه (يمكن تعديله يدوياً)" style="font-weight:bold; color:var(--primary-emp);" required></div>
                 <div class="form-group"><label>كلمة مرور بوابة الموظف <span class="req">*</span></label><input type="text" id="emp-pass" class="input-field" value="123456" required></div>
               </div>
@@ -557,7 +566,7 @@
                 <div class="form-group"><label>هاتف طوارئ 2</label><input type="text" id="emp-emg-phone2" class="input-field"></div>
               </div>
 
-              <!-- القسم 5: المالية -->
+              <!-- القسم 5: المالية والبنك والمرفقات -->
               <h4 style="color: var(--accent); border-bottom: 1px solid var(--border); padding-bottom: 5px; margin-bottom: 15px;">5. المعطيات المالية، البنك، الضمان، وتوثيق العقود</h4>
               
               <div class="grid-4">
@@ -611,7 +620,7 @@
           </div>
         </section>
 
-        <!-- الحضور -->
+        <!-- الحضور وتخصيص الموقع -->
         <section id="hr-attendance" class="view-section">
           <div class="card">
             <div class="card-title">إعدادات النطاق الجغرافي للمقر (Geofencing) وتخصيص الموظفين</div>
@@ -659,8 +668,9 @@
           </div>
         </section>
 
-        <!-- الرواتب -->
+        <!-- محرك الرواتب الشامل + التصدير للبنوك -->
         <section id="hr-payroll" class="view-section">
+          
           <div class="card">
             <div class="card-title">محرك حساب الرواتب والخصومات الذكية (Smart Payroll)</div>
             <div class="grid-3" style="margin-bottom: 10px;">
@@ -669,12 +679,16 @@
                 <select id="payroll-emp-select" class="input-field" onchange="loadEmpPayrollData()"></select>
               </div>
             </div>
+            
+            <!-- الدخل -->
             <h4 style="margin: 15px 0 10px; color: var(--sidebar-hr); border-bottom: 1px solid #e2e8f0; padding-bottom: 5px;">1. الدخل الإجمالي</h4>
             <div class="grid-3">
               <div class="form-group"><label>الراتب الأساسي</label><input type="number" id="pay-basic" class="input-field" oninput="calcPay()"></div>
               <div class="form-group"><label>بدلات</label><input type="number" id="pay-allowance" class="input-field" oninput="calcPay()"></div>
               <div class="form-group"><label>إجمالي الدخل الخاضع</label><input type="text" id="pay-gross" class="input-field" readonly></div>
             </div>
+            
+            <!-- الضمان والضريبة -->
             <h4 style="margin: 15px 0 10px; color: var(--sidebar-hr); border-bottom: 1px solid #e2e8f0; padding-bottom: 5px;">2. الضمان الاجتماعي والضريبة</h4>
             <div class="grid-4">
               <div class="form-group"><label>خصم ضمان الموظف %</label><input type="number" step="0.01" id="pay-ss-rate" class="input-field" value="7.5" oninput="calcPay()"></div>
@@ -682,29 +696,41 @@
               <div class="form-group"><label>ضريبة الدخل %</label><input type="number" step="0.01" id="pay-tax-rate" class="input-field" value="2.0" oninput="calcPay()"></div>
               <div class="form-group"><label>قيمة الضريبة</label><input type="text" id="pay-tax-amt" class="input-field" readonly style="color:var(--danger);"></div>
             </div>
+            
+            <!-- مساهمة الشركة -->
             <div class="grid-2" style="background: #f8fafc; padding: 10px; border-radius: 8px; margin-bottom: 15px;">
               <div class="form-group"><label>نسبة ضمان الشركة (مساهمة لا تُخصم من الموظف) %</label><input type="number" step="0.01" id="pay-comp-ss-rate" class="input-field" value="14.25" oninput="calcPay()"></div>
               <div class="form-group"><label>تكلفة ضمان الشركة الكلية</label><input type="text" id="pay-comp-ss-amt" class="input-field" readonly style="color:var(--warning);"></div>
             </div>
+
+            <!-- التأخيرات -->
             <h4 style="margin: 15px 0 10px; color: var(--danger); border-bottom: 1px solid #e2e8f0; padding-bottom: 5px;">3. التأخيرات والخصومات الإدارية</h4>
+            <div style="background: #fef2f2; padding: 10px; border-radius: 8px; margin-bottom: 15px; color: #991b1b; font-weight:bold;">محرك التأخيرات: يُعادل التأخير بالأيام ويُخصم من الإجازات أولاً، والمتبقي يُخصم مالياً.</div>
             <div class="grid-4">
               <div class="form-group"><label>ساعات التأخير (هذا الشهر)</label><input type="number" id="pay-delay" class="input-field" value="0" oninput="calcPay()"></div>
               <div class="form-group"><label>رصيد إجازات الموظف (أيام)</label><input type="number" step="0.5" id="pay-leave-bal" class="input-field" value="14" oninput="calcPay()"></div>
               <div class="form-group"><label>ما خُصم من الإجازات (أيام)</label><input type="text" id="pay-leave-deduct" class="input-field" readonly style="color:var(--sidebar-hr);"></div>
               <div class="form-group"><label>خصم مالي لتجاوز الإجازات</label><input type="text" id="pay-delay-amt" class="input-field" readonly style="color:var(--danger);"></div>
             </div>
+
             <div class="grid-2">
               <div class="form-group"><label>إجراء تأديبي إضافي (أيام خصم)</label><input type="number" id="pay-disc" class="input-field" value="0" oninput="calcPay()"></div>
               <div class="form-group"><label>سلف مقتطعة هذا الشهر</label><input type="number" id="pay-advance" class="input-field" value="0" oninput="calcPay()"></div>
             </div>
+
+            <!-- الملخص النهائي -->
             <div class="finance-summary">
               <div class="finance-item"><span>إجمالي الدخل</span><strong id="res-gross">0.00</strong></div>
               <div class="finance-item deduction"><span>إجمالي الخصومات</span><strong id="res-deduct">0.00</strong></div>
               <div class="finance-item net-salary"><span>صافي الراتب المستحق (Net)</span><strong id="res-net">0.00</strong></div>
             </div>
           </div>
+
+          <!-- البطاقة المحدثة: تصدير الرواتب للبنوك أو نقداً -->
           <div class="card" style="border-top: 4px solid var(--accent);">
             <div class="card-title">تصدير مسير الرواتب (للبنك / للتوقيع النقدي)</div>
+            <p style="color:var(--text-muted); font-size:0.9rem; margin-bottom:15px;">يُظهر الجدول تفاصيل التحويل. في حال كان الراتب "نقداً" يظهر مكان مخصص لتوقيع الموظف بدلاً من البنك.</p>
+            
             <div class="table-responsive">
               <table id="bank-report-table">
                 <thead><tr><th>#</th><th>اسم الموظف</th><th>الرقم الوظيفي</th><th>طريقة التسليم</th><th>البنك (ورمزه)</th><th>IBAN</th><th>الصافي المحول</th><th>توقيع الموظف (للنقدي)</th></tr></thead>
@@ -713,15 +739,17 @@
                 </tbody>
               </table>
             </div>
+
             <div style="margin-top: 20px; display: flex; gap: 10px; flex-wrap:wrap;">
               <button class="btn btn-hr" onclick="generateBankReport()">🔄 توليد كشف الرواتب الشامل</button>
               <button class="btn btn-emp" onclick="exportBankToEmail()">✉️ تصدير الكشف عبر الإيميل للبنك</button>
               <button class="btn btn-secondary" onclick="window.print()">🖨️ طباعة الكشف للتوقيع</button>
             </div>
           </div>
+
         </section>
 
-        <!-- التقارير -->
+        <!-- التقارير الفردية السرية -->
         <section id="hr-reports" class="view-section">
           <div class="card">
             <div class="card-title">إصدار الكشوفات الفردية السرية للطباعة</div>
@@ -733,6 +761,7 @@
               <button class="btn btn-hr" onclick="generateReport()">توليد التقرير السري</button>
               <button class="btn btn-secondary" onclick="window.print()">🖨️ طباعة (PDF)</button>
             </div>
+
             <div id="printable-area" style="display: none; border: 1px solid var(--border); padding: 24px; border-radius: 8px; margin-top: 20px; background: #fff;">
               <h2 style="text-align: center; border-bottom: 2px solid #0f172a; padding-bottom: 10px;">كشف موظف (سري)</h2>
               <div style="display: flex; justify-content: space-between; background: #f8fafc; padding: 15px; margin-bottom: 20px; font-weight: bold;">
@@ -772,12 +801,14 @@
           <button class="btn btn-danger" onclick="logout()">خروج</button>
         </div>
         
+        <!-- خانة البحث الشاملة (للموظف للبحث عن زميل) -->
         <div class="global-search-container">
           <input type="text" class="global-search-input" placeholder="🔍 بحث عن زميل (الاسم، الرقم)..." onkeyup="performGlobalSearch(this)">
           <div class="search-results-dropdown"></div>
         </div>
       </header>
       <div class="content-container">
+        
         <section id="emp-dashboard" class="view-section active">
           <div class="card" style="text-align: center; max-width: 500px; margin: 0 auto;">
             <h2 style="margin-bottom: 10px; color: var(--sidebar-emp);">تسجيل الحضور والانصراف</h2>
@@ -791,15 +822,25 @@
             </div>
           </div>
         </section>
+
         <section id="emp-leaves" class="view-section">
           <div class="card" style="max-width: 600px; margin: 0 auto;">
             <div class="card-title">تقديم طلب إجازة أو مغادرة</div>
-            <div class="form-group"><label>نوع الطلب</label><select class="input-field" style="margin:0;"><option>إجازة سنوية</option><option>إجازة مرضية (يلزم تقرير)</option><option>مغادرة</option></select></div>
-            <div class="grid-2" style="margin-top: 15px;"><div class="form-group"><label>من تاريخ</label><input type="date" class="input-field" style="margin:0;"></div><div class="form-group"><label>إلى تاريخ</label><input type="date" class="input-field" style="margin:0;"></div></div>
-            <div class="form-group" style="margin-top: 15px;"><label>المرفق (إن وجد)</label><input type="file" class="input-field" style="margin:0;"></div>
+            <div class="form-group">
+              <label>نوع الطلب</label>
+              <select class="input-field" style="margin:0;"><option>إجازة سنوية</option><option>إجازة مرضية (يلزم تقرير)</option><option>مغادرة</option></select>
+            </div>
+            <div class="grid-2" style="margin-top: 15px;">
+              <div class="form-group"><label>من تاريخ</label><input type="date" class="input-field" style="margin:0;"></div>
+              <div class="form-group"><label>إلى تاريخ</label><input type="date" class="input-field" style="margin:0;"></div>
+            </div>
+            <div class="form-group" style="margin-top: 15px;">
+              <label>المرفق (إن وجد)</label><input type="file" class="input-field" style="margin:0;">
+            </div>
             <button class="btn btn-emp" style="width: 100%; margin-top: 15px;" onclick="alert('تم إرسال الطلب لمدير الموارد البشرية للموافقة')">إرسال الطلب</button>
           </div>
         </section>
+
       </div>
     </main>
   </div>
@@ -810,7 +851,6 @@
       const initialDB = {
         licenses: [], transactions: [], activeHRKey: null, globalCounter: 1000, employees: [],
         settings: {},
-        // إضافة مستخدم النظام الأساسي الأول (المالك)
         masterUsers: [{
             id: 'MU-1',
             name: 'المدير العام',
@@ -1036,6 +1076,8 @@
           document.querySelectorAll('aside').forEach(el => el.classList.remove('open'));
           document.getElementById('mobile-overlay').classList.remove('active');
       }
+      
+      if(tabId === 'hr-employee') generateEmpId(); 
     }
 
     function handleActivation(event) {
@@ -1082,7 +1124,6 @@
       const accNavBtn = document.getElementById('master-nav-accounting');
       if(!perms.acc) {
           accNavBtn.style.display = 'none';
-          // إذا كان واقف على المحاسبة رجعه للرخص
           switchTab('master-licenses', 'master', document.querySelector('.master-mode .nav-btn'));
       } else {
           accNavBtn.style.display = 'block';
@@ -1099,6 +1140,11 @@
           durSelect.innerHTML += '<option value="365">اشتراك سنوي</option>';
       }
       
+      // توليد رقم شركة عشوائي مبدئي
+      if(!document.getElementById('new-company-code').value) {
+          document.getElementById('new-company-code').value = Math.floor(1000 + Math.random() * 9000).toString();
+      }
+
       renderLicensesTable(); calculateAndRenderAccounting(); renderMasterUsersTable();
     }
 
@@ -1175,12 +1221,24 @@
       const durSelect = document.getElementById('new-license-duration');
       if(!durSelect.options.length) { alert('ليس لديك صلاحيات لبيع تراخيص حالياً.'); return; }
       const dur = durSelect.value;
-      if(!comp) return;
       
-      let db = getDB(); db.globalCounter++; 
-      const companyCode = Math.floor(1000 + Math.random() * 9000).toString();
+      const codeInput = document.getElementById('new-company-code').value.trim();
+      const passInput = document.getElementById('new-company-pass').value.trim();
+
+      if(!comp || !codeInput || !passInput) {
+        alert("يرجى تعبئة كافة الحقول (الاسم، الرمز، وكلمة المرور)!"); return;
+      }
+      
+      let db = getDB(); 
+      if(db.licenses.some(l => l.companyCode === codeInput)) {
+        alert("رمز الشركة مستخدم لشركة أخرى، يرجى كتابة رمز مختلف!"); return;
+      }
+
+      db.globalCounter++; 
+      
+      const companyCode = codeInput;
       const hrUser = "hr" + companyCode;
-      const hrPass = "123456";
+      const hrPass = passInput;
       
       const newLicense = {
         serial: `UTC-V${db.globalCounter}`, 
@@ -1197,6 +1255,8 @@
       db.licenses.push(newLicense); saveDB(db);
       alert(`تم توليد الترخيص.\nيرجى تزويد العميل بالبيانات التالية للدخول:\nرمز الشركة: ${companyCode}\nاسم المستخدم: ${hrUser}\nكلمة المرور: ${hrPass}`); 
       document.getElementById('new-company-name').value = '';
+      document.getElementById('new-company-code').value = Math.floor(1000 + Math.random() * 9000).toString();
+      document.getElementById('new-company-pass').value = '123456';
       renderLicensesTable();
     }
 
@@ -1224,6 +1284,7 @@
       });
     }
 
+    // المحاسبة الخاصة بالمالك (Master)
     function addTransaction() {
       let db = getDB();
       db.transactions.push({
@@ -1333,14 +1394,27 @@
 
     }
 
-    // ================= 5. إدارة الموظفين (HR) =================
+    // ================= 5. إدارة الموظفين المعزولة (HR) =================
+    function toggleBankDetails() {
+      let method = document.getElementById('emp-payment-method').value;
+      let bankEl = document.getElementById('emp-bank');
+      let ibanEl = document.getElementById('emp-iban');
+      if(method === 'bank') {
+        bankEl.required = true; ibanEl.required = true;
+        bankEl.disabled = false; ibanEl.disabled = false;
+      } else {
+        bankEl.required = false; ibanEl.required = false;
+        bankEl.disabled = true; ibanEl.disabled = true;
+        bankEl.value = ''; ibanEl.value = '';
+      }
+    }
+
     function generateEmpId() {
       const main = document.getElementById('emp-main-dept');
       const sub = document.getElementById('emp-sub-dept');
       let currentCode = sessionStorage.getItem('current_company_code');
       let db = getDB();
       
-      // التوليد الآلي متاح ولكن لا يفرض القيود الصارمة (readonly) كما طلبت
       if(main && sub && main.value && sub.value) {
         let mVal = main.value;
         let sVal = sub.value;
@@ -1357,20 +1431,6 @@
       let shortIdInput = document.getElementById('emp-short-id');
       if (!shortIdInput.value) {
           shortIdInput.value = `${Math.floor(1000 + Math.random() * 9000)}`;
-      }
-    }
-
-    function toggleBankDetails() {
-      let method = document.getElementById('emp-payment-method').value;
-      let bankEl = document.getElementById('emp-bank');
-      let ibanEl = document.getElementById('emp-iban');
-      if(method === 'bank') {
-        bankEl.required = true; ibanEl.required = true;
-        bankEl.disabled = false; ibanEl.disabled = false;
-      } else {
-        bankEl.required = false; ibanEl.required = false;
-        bankEl.disabled = true; ibanEl.disabled = true;
-        bankEl.value = ''; ibanEl.value = '';
       }
     }
 
@@ -1393,21 +1453,26 @@
       let shortIdVal = document.getElementById('emp-short-id').value.trim();
       let empIdVal = document.getElementById('emp-id').value.trim();
 
-      // حماية لمنع التكرار
+      // حماية لمنع تكرار رقم الدخول السريع أو الرقم الوظيفي داخل نفس الشركة فقط
       let isShortIdExists = db.employees.some(emp => emp.companyCode === currentCode && emp.shortId === shortIdVal);
       if(isShortIdExists) {
-        alert("⚠️ عذراً، رقم الدخول السريع (" + shortIdVal + ") مستخدم مسبقاً. يرجى إدخال رقم مختلف."); return; 
+        alert("⚠️ عذراً، رقم الدخول السريع (" + shortIdVal + ") مستخدم مسبقاً لموظف آخر. يرجى إدخال رقم مختلف.");
+        return; 
       }
+      
       let isEmpIdExists = db.employees.some(emp => emp.companyCode === currentCode && emp.id === empIdVal);
       if(isEmpIdExists) {
-        alert("⚠️ عذراً، الرقم الوظيفي (" + empIdVal + ") مستخدم مسبقاً. يرجى تعديله."); return; 
+        alert("⚠️ عذراً، الرقم الوظيفي (" + empIdVal + ") مستخدم مسبقاً. يرجى تعديله.");
+        return; 
       }
 
       let nationalityVal = document.getElementById('emp-nationality').value;
-      if(nationalityVal === 'other') { nationalityVal = document.getElementById('emp-nationality-other').value.trim(); }
+      if(nationalityVal === 'other') {
+          nationalityVal = document.getElementById('emp-nationality-other').value.trim();
+      }
 
       const newEmp = {
-        companyCode: currentCode, 
+        companyCode: currentCode, // عزل البيانات للشركة
         id: empIdVal, 
         shortId: shortIdVal,
         password: document.getElementById('emp-pass').value,
@@ -1536,7 +1601,7 @@
       compEmployees.forEach((emp, index) => {
         let gross = (emp.salary || 0) + (emp.allowance || 0);
         let ssAmt = gross * ((emp.ssRate || 7.5)/100);
-        let taxAmt = gross * 0.02; 
+        let taxAmt = gross * 0.02; // ضريبة قياسية للتصدير السريع
         let net = gross - ssAmt - taxAmt;
         
         let payMethodText = emp.paymentMethod === 'cash' ? 'نقداً' : (emp.paymentMethod === 'check' ? 'شيك' : 'تحويل بنكي');
