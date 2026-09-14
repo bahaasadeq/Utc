@@ -189,8 +189,8 @@
       <h2>UTC <span>Gate</span></h2>
       <p>بوابة الدخول الموحدة للمنظومة</p>
       <form onsubmit="handleLogin(event)">
-        <!-- الخانات مدمجة لتسهيل حفظ المتصفحات للهواتف -->
-        <input type="text" id="login-user" class="input-field" placeholder="اسم المستخدم أو رقم الدخول (HR/موظف)" autocomplete="off" required>
+        <!-- الخانات مدمجة لتسهيل حفظ المتصفحات للهواتف، خانتين فقط كما طلبت! -->
+        <input type="text" id="login-user" class="input-field" placeholder="اسم المستخدم أو رقم الدخول (HR/موظف/مالك)" autocomplete="off" required>
         <input type="password" id="login-pass" class="input-field" placeholder="كلمة المرور" required>
         
         <button type="submit" class="btn-auth">دخول آمن (Login)</button>
@@ -199,7 +199,7 @@
         <div id="login-error" class="error-msg">البيانات غير صحيحة أو الترخيص معطل!</div>
         
         <div class="contact-footer">
-          للتواصل والدعم الفني:<br>
+          للتواصل والدعم الفني :<br>
           🇯🇴 +962799758747<br>
           bahaa.s.jod@gmail.com
         </div>
@@ -207,7 +207,7 @@
     </div>
   </div>
 
-  <!-- شاشة طلب تسجيل شركة جديدة -->
+  <!-- شاشة طلب تسجيل شركة جديدة (مع أنا لست روبوت) -->
   <div id="register-screen" class="overlay-screen" style="display: none;">
     <div class="auth-card">
       <h2>تسجيل <span>شركة جديدة</span></h2>
@@ -230,7 +230,7 @@
     </div>
   </div>
 
-  <!-- شاشة التفعيل القديمة (أبقيتها مخفية التزاماً بعدم الحذف) -->
+  <!-- شاشة التفعيل القديمة (مخفية التزاماً بعدم الحذف) -->
   <div id="activation-screen" class="overlay-screen" style="display: none;">
     <div class="auth-card">
       <h2>تفعيل <span>النظام</span></h2>
@@ -468,11 +468,7 @@
           <div class="card" style="border-top: 4px solid var(--primary-hr);">
             <div class="card-title" style="color: var(--sidebar-hr);">حالة النظام وصلاحية الترخيص</div>
             <div style="display: flex; justify-content: space-between; align-items: center; flex-wrap:wrap; gap:15px;">
-              <div>
-                <span style="color:var(--text-muted); font-size:0.85rem;">مفتاح الرخصة:</span> <span id="display-hr-key" class="badge-code"></span><br>
-                <span style="color:var(--text-muted); font-size:0.85rem;">النسخة التسلسلية:</span> <span id="display-hr-serial" class="badge-serial"></span><br>
-                <span style="color:var(--text-muted); font-size:0.85rem;">رمز الشركة:</span> <span id="display-hr-code" class="badge-serial" style="background:var(--primary-hr);"></span>
-              </div>
+              <div>الرخصة: <span id="display-hr-key" class="badge-code"></span><br>رمز الشركة الخاص: <span id="display-hr-code" class="badge-serial"></span></div>
               <div style="text-align: left;">
                 <div style="font-size: 0.8rem; color: var(--text-muted); font-weight: bold;">الوقت المتبقي للنسخة</div>
                 <div id="hr-countdown-days" style="font-size: 2.5rem; font-weight: 800; color: var(--accent); line-height: 1;"></div>
@@ -485,7 +481,7 @@
           </div>
         </section>
 
-        <!-- الإعدادات (الأقسام + البنوك المطورة) -->
+        <!-- الإعدادات -->
         <section id="hr-settings" class="view-section">
           <div class="alert-box">⚙️ قم بتعريف الأقسام، المسميات الوظيفية، ودليل البنوك الخاص بشركتك لاستخدامها في ملف الموظف. كل شركة لها إعداداتها المعزولة والخاصة بها.</div>
           <div class="grid-2">
@@ -523,7 +519,7 @@
             <div class="card-title">إضافة موظف جديد شامل (قاعدة البيانات)</div>
             <div class="alert-box" style="background:#eff6ff; border-color:#bfdbfe; color:#1e40af;">
               💡 <strong>تنبيه:</strong> الحقول التي بجانبها نجمة حمراء (<span class="req">*</span>) إجبارية. 
-              <br>🔑 <strong>تعديل الرقم الوظيفي والدخول السريع:</strong> يمكنك التعديل يدوياً على الرقم الوظيفي المولد، ورقم الدخول السريع. سيرفض النظام أي رقم سريع مكرر لضمان عدم تداخل دخول الموظفين. يتم تصفير العداد التسلسلي وبدء العد مع إضافة الموظفين للشركة الحالية.
+              <br>🔑 <strong>تعديل الرقم الوظيفي والدخول السريع:</strong> يمكنك التعديل يدوياً، وسيرفض النظام أي رقم سريع مكرر لضمان عدم التداخل. يتم الترقيم التلقائي مع الأقسام.
             </div>
             
             <form id="employee-form" onsubmit="saveNewEmployee(event)">
@@ -758,6 +754,7 @@
               <button class="btn btn-secondary" onclick="window.print()">🖨️ طباعة الكشف للتوقيع</button>
             </div>
           </div>
+
         </section>
 
         <!-- التقارير الفردية السرية -->
@@ -856,7 +853,7 @@
   </div>
 
   <script>
-    // ================= تهيئة قاعدة البيانات المحلية مع عزل الشركات (Multi-Tenancy) وفرق Master =================
+    // ================= تهيئة قاعدة البيانات المحلية مع عزل الشركات وفرق Master =================
     if (!localStorage.getItem('utc_db')) {
       const initialDB = {
         licenses: [], transactions: [], activeHRKey: null, globalCounter: 1000, employees: [], settings: {},
@@ -975,10 +972,9 @@
         alert(`تم اعتماد الموقع (${locName}) وتخصيصه لـ: ${targetName} بنجاح!`);
     }
 
-    // ================= الدخول =================
+    // ================= الدخول الذكي المعدل (خانتين فقط) =================
     function handleLogin(event) {
       event.preventDefault();
-      const code = document.getElementById('login-code').value.trim();
       const user = document.getElementById('login-user').value.trim();
       const pass = document.getElementById('login-pass').value;
 
@@ -987,7 +983,7 @@
 
       // فحص المالك
       let masterUser = db.masterUsers.find(u => u.username === user && u.password === pass);
-      if (masterUser && !code) {
+      if (masterUser) {
           sessionStorage.setItem('logged_master_name', masterUser.name);
           sessionStorage.setItem('logged_master_user', masterUser.username);
           sessionStorage.setItem('master_perms', JSON.stringify({
@@ -1000,31 +996,47 @@
           return;
       }
       
-      // فحص مدير الـ HR 
-      let matchedLicense = db.licenses.find(l => l.companyCode === code && l.hrUser === user && l.hrPass === pass && l.status === 'active');
+      // التوافق القديم
+      if (user.toLowerCase() === "master" && pass === "1000") {
+          sessionStorage.setItem('logged_master_name', "المدير العام (Legacy)");
+          sessionStorage.setItem('master_perms', JSON.stringify({ annual: true, trial: true, acc: true, isSuper: true }));
+          openMasterPortal(); return; 
+      }
+      
+      // فحص مدير الـ HR في جميع الشركات
+      let matchedLicense = db.licenses.find(l => l.hrUser === user && l.hrPass === pass && l.status === 'active');
       if(matchedLicense) {
-          sessionStorage.setItem('current_company_code', code);
+          sessionStorage.setItem('current_company_code', matchedLicense.companyCode);
           openPortal('hr-portal', matchedLicense);
           return;
       }
       
-      // فحص الموظفين 
-      let matchedEmp = db.employees.find(e => e.companyCode === code && (e.shortId === user || e.id === user) && e.password === pass);
+      // فحص الموظفين في جميع الشركات
+      let matchedEmp = db.employees.find(e => (e.shortId === user || e.id === user) && e.password === pass);
       if (matchedEmp) {
-        let empLicense = db.licenses.find(l => l.companyCode === code && l.status === 'active');
+        let empLicense = db.licenses.find(l => l.companyCode === matchedEmp.companyCode && l.status === 'active');
         if(empLicense) {
-            sessionStorage.setItem('current_company_code', code);
+            sessionStorage.setItem('current_company_code', matchedEmp.companyCode);
             sessionStorage.setItem('logged_emp_name', matchedEmp.name);
             openPortal('emp-portal', empLicense);
             return;
         }
       } 
       
+      // دخول تجريبي
+      else if (user.toLowerCase() === "emp" && pass === "1000") { 
+        sessionStorage.setItem('logged_emp_name', "موظف تجريبي");
+        document.getElementById('login-screen').style.display = 'none';
+        document.getElementById('emp-portal').style.display = 'flex';
+        document.getElementById('app-body').className = 'emp-mode';
+        document.getElementById('logged-emp-name-display').innerText = "موظف تجريبي";
+        return;
+      }
+
       document.getElementById('login-error').style.display = 'block';
     }
 
     function logout() {
-      document.getElementById('login-code').value = "";
       document.getElementById('login-user').value = ""; 
       document.getElementById('login-pass').value = "";
       sessionStorage.clear();
@@ -1059,7 +1071,7 @@
 
     function handleActivation(event) {
       event.preventDefault();
-      alert('يتم الآن تفعيل النظام عبر شاشة الدخول المباشرة برمز الشركة واسم المستخدم الخاص بكم.');
+      alert('يتم الآن تفعيل النظام عبر شاشة الدخول المباشرة باسم المستخدم الخاص بكم.');
       logout();
     }
 
@@ -1196,7 +1208,6 @@
        });
     }
 
-    // توليد رخص الشركات وتعديلها
     function generateAndSaveLicense() {
       const comp = document.getElementById('new-company-name').value;
       const durSelect = document.getElementById('new-license-duration');
@@ -1228,7 +1239,6 @@
       renderLicensesTable();
     }
 
-    // نافذة تعديل بيانات الشركة
     function openEditLicense(key) {
       let db = getDB();
       let lic = db.licenses.find(l => l.key === key);
@@ -1346,29 +1356,47 @@
       let method = document.getElementById('emp-payment-method').value; let bankEl = document.getElementById('emp-bank'); let ibanEl = document.getElementById('emp-iban');
       if(method === 'bank') { bankEl.required = true; ibanEl.required = true; bankEl.disabled = false; ibanEl.disabled = false; } else { bankEl.required = false; ibanEl.required = false; bankEl.disabled = true; ibanEl.disabled = true; bankEl.value = ''; ibanEl.value = ''; }
     }
+    
     function generateEmpId() {
       const main = document.getElementById('emp-main-dept'); const sub = document.getElementById('emp-sub-dept');
       let currentCode = sessionStorage.getItem('current_company_code'); let db = getDB();
+      
       if(main && sub && main.value && sub.value) {
         let mVal = main.value; let sVal = sub.value;
         let compEmployees = db.employees.filter(e => e.companyCode === currentCode);
         let idField = document.getElementById('emp-id');
-        if(!idField.value || idField.value.includes('UTC-0000')) { idField.value = `UTC-${mVal}${sVal}-${String(compEmployees.length + 1).padStart(3, '0')}`; }
+        
+        // الترقيم الآلي يبدأ مع أول إضافة للشركة
+        if(!idField.value || idField.value.includes('UTC-0000') || idField.value.includes('UTC-0000-000')) { 
+            idField.value = `UTC-${mVal}${sVal}-${String(compEmployees.length + 1).padStart(3, '0')}`; 
+        }
       }
       let shortIdInput = document.getElementById('emp-short-id');
       if (!shortIdInput.value) { shortIdInput.value = `${Math.floor(1000 + Math.random() * 9000)}`; }
     }
+    
     function calculateAge() {
       const dobInput = document.getElementById('emp-dob').value; if (!dobInput) return;
       document.getElementById('age-display').value = `${new Date().getFullYear() - new Date(dobInput).getFullYear()} سنة`;
     }
+    
     function saveNewEmployee(e) {
       e.preventDefault();
       if(!document.getElementById('emp-main-dept').value || !document.getElementById('emp-payment-method').value) { alert("تأكد من الأقسام وطريقة الدفع!"); return; }
-      let db = getDB(); let currentCode = sessionStorage.getItem('current_company_code');
-      let shortIdVal = document.getElementById('emp-short-id').value.trim(); let empIdVal = document.getElementById('emp-id').value.trim();
-      if(db.employees.some(emp => emp.companyCode === currentCode && emp.shortId === shortIdVal)) { alert("رقم الدخول السريع مستخدم مسبقاً لموظف آخر!"); return; }
-      if(db.employees.some(emp => emp.companyCode === currentCode && emp.id === empIdVal)) { alert("الرقم الوظيفي مستخدم مسبقاً!"); return; }
+      
+      let db = getDB(); 
+      // منع إعطاء يوزر لشركة أخرى (التحقق العام لمنع التداخل)
+      let shortIdVal = document.getElementById('emp-short-id').value.trim(); 
+      let empIdVal = document.getElementById('emp-id').value.trim();
+      let currentCode = sessionStorage.getItem('current_company_code');
+
+      // حماية فائقة لمنع أي موظف في أي شركة من أخذ رقم مسجل (لضمان تسجيل الدخول الذكي)
+      let isShortIdExistsGlobally = db.employees.some(emp => emp.shortId === shortIdVal);
+      if(isShortIdExistsGlobally) { alert("⚠️ عذراً، رقم الدخول السريع مستخدم مسبقاً في النظام. يرجى إدخال رقم مختلف."); return; }
+      
+      let isEmpIdExists = db.employees.some(emp => emp.companyCode === currentCode && emp.id === empIdVal);
+      if(isEmpIdExists) { alert("⚠️ عذراً، الرقم الوظيفي مستخدم مسبقاً. يرجى تعديله."); return; }
+      
       let natVal = document.getElementById('emp-nationality').value; if(natVal === 'other') natVal = document.getElementById('emp-nationality-other').value.trim();
 
       db.employees.push({
@@ -1383,6 +1411,7 @@
       });
       saveDB(db); alert('تم حفظ واعتماد الموظف!'); e.target.reset(); document.getElementById('emp-short-id').value = ''; document.getElementById('emp-id').value = ''; generateEmpId(); loadHRData(); 
     }
+    
     function loadHRData() {
       const db = getDB(); const currentCode = sessionStorage.getItem('current_company_code'); const compEmployees = db.employees.filter(e => e.companyCode === currentCode);
       document.getElementById('stat-total-emp').innerText = compEmployees.length; document.getElementById('stat-total-salary').innerText = compEmployees.reduce((sum, emp) => sum + emp.salary + emp.allowance, 0).toLocaleString();
