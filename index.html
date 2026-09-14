@@ -177,22 +177,21 @@
     .punch-circle:active { transform: scale(0.95); }
     .clock-display { font-size: 2rem; font-weight: 800; margin-bottom: 5px; font-variant-numeric: tabular-nums;}
     
-    /* Checkbox Styles for Master Permissions */
     .perm-checkbox { display: flex; align-items: center; gap: 8px; cursor: pointer; font-weight: 600; font-size: 0.9rem; }
     .perm-checkbox input { width: 18px; height: 18px; cursor: pointer; }
   </style>
 </head>
 <body id="app-body">
 
-  <!-- ================= 1. شاشة تسجيل الدخول الموحدة والعزل ================= -->
+  <!-- ================= 1. شاشة تسجيل الدخول الموحدة والعزل المطور ================= -->
   <div id="login-screen" class="overlay-screen">
     <div class="auth-card">
       <h2>UTC <span>Gate</span></h2>
       <p>بوابة الدخول الموحدة للمنظومة</p>
       <form onsubmit="handleLogin(event)">
-        <input type="text" id="login-code" class="input-field" placeholder="Company Code / رمز الشركة (فارغ للمالك)" autocomplete="off">
-        <input type="text" id="login-user" class="input-field" placeholder="User Name / اسم المستخدم أو الرقم السريع" autocomplete="off" required>
-        <input type="password" id="login-pass" class="input-field" placeholder="Password / كلمة المرور" required>
+        <!-- الخانات مدمجة لتسهيل حفظ المتصفحات للهواتف -->
+        <input type="text" id="login-user" class="input-field" placeholder="اسم المستخدم أو رقم الدخول (HR/موظف)" autocomplete="off" required>
+        <input type="password" id="login-pass" class="input-field" placeholder="كلمة المرور" required>
         
         <button type="submit" class="btn-auth">دخول آمن (Login)</button>
         <button type="button" class="btn-secondary-auth" onclick="showRegisterScreen()">طلب تسجيل شركة جديدة (SaaS Request)</button>
@@ -200,7 +199,7 @@
         <div id="login-error" class="error-msg">البيانات غير صحيحة أو الترخيص معطل!</div>
         
         <div class="contact-footer">
-          للتواصل والدعم الفني للإدارة العليا:<br>
+          للتواصل والدعم الفني:<br>
           🇯🇴 +962799758747<br>
           bahaa.s.jod@gmail.com
         </div>
@@ -208,7 +207,7 @@
     </div>
   </div>
 
-  <!-- شاشة طلب تسجيل شركة جديدة (مع أنا لست روبوت) -->
+  <!-- شاشة طلب تسجيل شركة جديدة -->
   <div id="register-screen" class="overlay-screen" style="display: none;">
     <div class="auth-card">
       <h2>تسجيل <span>شركة جديدة</span></h2>
@@ -219,6 +218,7 @@
         <input type="tel" id="reg-comp-phone" class="input-field" placeholder="رقم هاتف التواصل" required>
         <input type="email" id="reg-comp-email" class="input-field" placeholder="البريد الإلكتروني الرسمي" required>
         
+        <!-- خانة أنا لست روبوت -->
         <div class="robot-check-container">
           <input type="checkbox" id="robot-check" required>
           <label for="robot-check">أنا لست روبوت (I'm not a robot)</label>
@@ -244,7 +244,7 @@
     </div>
   </div>
 
-  <!-- شاشة تعديل بيانات الشركة (جديد) -->
+  <!-- شاشة تعديل بيانات الشركة -->
   <div id="edit-license-screen" class="overlay-screen" style="display: none;">
     <div class="auth-card">
       <h2>تعديل <span>بيانات الشركة</span></h2>
@@ -468,7 +468,11 @@
           <div class="card" style="border-top: 4px solid var(--primary-hr);">
             <div class="card-title" style="color: var(--sidebar-hr);">حالة النظام وصلاحية الترخيص</div>
             <div style="display: flex; justify-content: space-between; align-items: center; flex-wrap:wrap; gap:15px;">
-              <div>الرخصة: <span id="display-hr-key" class="badge-code"></span><br>رمز الشركة الخاص: <span id="display-hr-code" class="badge-serial"></span></div>
+              <div>
+                <span style="color:var(--text-muted); font-size:0.85rem;">مفتاح الرخصة:</span> <span id="display-hr-key" class="badge-code"></span><br>
+                <span style="color:var(--text-muted); font-size:0.85rem;">النسخة التسلسلية:</span> <span id="display-hr-serial" class="badge-serial"></span><br>
+                <span style="color:var(--text-muted); font-size:0.85rem;">رمز الشركة:</span> <span id="display-hr-code" class="badge-serial" style="background:var(--primary-hr);"></span>
+              </div>
               <div style="text-align: left;">
                 <div style="font-size: 0.8rem; color: var(--text-muted); font-weight: bold;">الوقت المتبقي للنسخة</div>
                 <div id="hr-countdown-days" style="font-size: 2.5rem; font-weight: 800; color: var(--accent); line-height: 1;"></div>
@@ -481,9 +485,9 @@
           </div>
         </section>
 
-        <!-- الإعدادات -->
+        <!-- الإعدادات (الأقسام + البنوك المطورة) -->
         <section id="hr-settings" class="view-section">
-          <div class="alert-box">⚙️ قم بتعريف الأقسام، المسميات الوظيفية، ودليل البنوك الخاص بشركتك لاستخدامها في ملف الموظف. كل شركة لها إعداداتها المعزولة.</div>
+          <div class="alert-box">⚙️ قم بتعريف الأقسام، المسميات الوظيفية، ودليل البنوك الخاص بشركتك لاستخدامها في ملف الموظف. كل شركة لها إعداداتها المعزولة والخاصة بها.</div>
           <div class="grid-2">
             <div class="card" style="margin-bottom: 0;">
               <h4 style="margin-bottom: 15px; color: var(--sidebar-hr);">الأقسام الرئيسية</h4>
@@ -513,13 +517,13 @@
           </div>
         </section>
 
-        <!-- ملف الموظف -->
+        <!-- ملف الموظف الشامل -->
         <section id="hr-employee" class="view-section">
           <div class="card">
             <div class="card-title">إضافة موظف جديد شامل (قاعدة البيانات)</div>
             <div class="alert-box" style="background:#eff6ff; border-color:#bfdbfe; color:#1e40af;">
               💡 <strong>تنبيه:</strong> الحقول التي بجانبها نجمة حمراء (<span class="req">*</span>) إجبارية. 
-              <br>🔑 <strong>الرقم الوظيفي والدخول السريع:</strong> يمكنك تعديلها يدوياً، وسيرفض النظام أي تكرار لضمان عدم تداخل الموظفين.
+              <br>🔑 <strong>تعديل الرقم الوظيفي والدخول السريع:</strong> يمكنك التعديل يدوياً على الرقم الوظيفي المولد، ورقم الدخول السريع. سيرفض النظام أي رقم سريع مكرر لضمان عدم تداخل دخول الموظفين. يتم تصفير العداد التسلسلي وبدء العد مع إضافة الموظفين للشركة الحالية.
             </div>
             
             <form id="employee-form" onsubmit="saveNewEmployee(event)">
@@ -529,10 +533,10 @@
                 <div class="form-group"><label>القسم الفرعي <span class="req">*</span></label><select id="emp-sub-dept" class="input-field" onchange="generateEmpId()" required></select></div>
                 <div class="form-group"><label>المسمى الوظيفي <span class="req">*</span></label><select id="emp-job-title" class="input-field" required></select></div>
                 
-                <div class="form-group"><label>الرقم الوظيفي (قابل للتعديل) <span class="req">*</span></label><input type="text" id="emp-id" class="input-field" style="font-weight:bold; color:var(--primary-hr);" required></div>
+                <div class="form-group"><label>الرقم الوظيفي <span class="req">*</span></label><input type="text" id="emp-id" class="input-field" style="font-weight:bold; color:var(--primary-hr);" required></div>
               </div>
               <div class="grid-4">
-                <div class="form-group"><label>رقم الدخول السريع للموظف (قابل للتعديل) <span class="req">*</span></label><input type="text" id="emp-short-id" class="input-field" style="font-weight:bold; color:var(--primary-emp);" required></div>
+                <div class="form-group"><label>رقم الدخول السريع (للموظف) <span class="req">*</span></label><input type="text" id="emp-short-id" class="input-field" title="رقم مختصر لدخول الموظف من هاتفه (يمكن تعديله يدوياً)" style="font-weight:bold; color:var(--primary-emp);" required></div>
                 <div class="form-group"><label>كلمة مرور بوابة الموظف <span class="req">*</span></label><input type="text" id="emp-pass" class="input-field" value="123456" required></div>
               </div>
 
@@ -634,7 +638,7 @@
           </div>
         </section>
 
-        <!-- الحضور -->
+        <!-- الحضور وتخصيص الموقع -->
         <section id="hr-attendance" class="view-section">
           <div class="card">
             <div class="card-title">إعدادات النطاق الجغرافي للمقر (Geofencing) وتخصيص الموظفين</div>
@@ -682,8 +686,9 @@
           </div>
         </section>
 
-        <!-- الرواتب -->
+        <!-- محرك الرواتب الشامل + التصدير للبنوك -->
         <section id="hr-payroll" class="view-section">
+          
           <div class="card">
             <div class="card-title">محرك حساب الرواتب والخصومات الذكية (Smart Payroll)</div>
             <div class="grid-3" style="margin-bottom: 10px;">
@@ -714,6 +719,7 @@
             </div>
 
             <h4 style="margin: 15px 0 10px; color: var(--danger); border-bottom: 1px solid #e2e8f0; padding-bottom: 5px;">3. التأخيرات والخصومات الإدارية</h4>
+            <div style="background: #fef2f2; padding: 10px; border-radius: 8px; margin-bottom: 15px; color: #991b1b; font-weight:bold;">محرك التأخيرات: يُعادل التأخير بالأيام ويُخصم من الإجازات أولاً، والمتبقي يُخصم مالياً.</div>
             <div class="grid-4">
               <div class="form-group"><label>ساعات التأخير (هذا الشهر)</label><input type="number" id="pay-delay" class="input-field" value="0" oninput="calcPay()"></div>
               <div class="form-group"><label>رصيد إجازات الموظف (أيام)</label><input type="number" step="0.5" id="pay-leave-bal" class="input-field" value="14" oninput="calcPay()"></div>
@@ -735,6 +741,8 @@
 
           <div class="card" style="border-top: 4px solid var(--accent);">
             <div class="card-title">تصدير مسير الرواتب (للبنك / للتوقيع النقدي)</div>
+            <p style="color:var(--text-muted); font-size:0.9rem; margin-bottom:15px;">يُظهر الجدول تفاصيل التحويل. في حال كان الراتب "نقداً" يظهر مكان مخصص لتوقيع الموظف بدلاً من البنك.</p>
+            
             <div class="table-responsive">
               <table id="bank-report-table">
                 <thead><tr><th>#</th><th>اسم الموظف</th><th>الرقم الوظيفي</th><th>طريقة التسليم</th><th>البنك (ورمزه)</th><th>IBAN</th><th>الصافي المحول</th><th>توقيع الموظف (للنقدي)</th></tr></thead>
@@ -752,7 +760,7 @@
           </div>
         </section>
 
-        <!-- التقارير -->
+        <!-- التقارير الفردية السرية -->
         <section id="hr-reports" class="view-section">
           <div class="card">
             <div class="card-title">إصدار الكشوفات الفردية السرية للطباعة</div>
@@ -764,6 +772,7 @@
               <button class="btn btn-hr" onclick="generateReport()">توليد التقرير السري</button>
               <button class="btn btn-secondary" onclick="window.print()">🖨️ طباعة (PDF)</button>
             </div>
+
             <div id="printable-area" style="display: none; border: 1px solid var(--border); padding: 24px; border-radius: 8px; margin-top: 20px; background: #fff;">
               <h2 style="text-align: center; border-bottom: 2px solid #0f172a; padding-bottom: 10px;">كشف موظف (سري)</h2>
               <div style="display: flex; justify-content: space-between; background: #f8fafc; padding: 15px; margin-bottom: 20px; font-weight: bold;">
@@ -847,7 +856,7 @@
   </div>
 
   <script>
-    // ================= تهيئة قاعدة البيانات المحلية =================
+    // ================= تهيئة قاعدة البيانات المحلية مع عزل الشركات (Multi-Tenancy) وفرق Master =================
     if (!localStorage.getItem('utc_db')) {
       const initialDB = {
         licenses: [], transactions: [], activeHRKey: null, globalCounter: 1000, employees: [], settings: {},
@@ -980,7 +989,7 @@
       let masterUser = db.masterUsers.find(u => u.username === user && u.password === pass);
       if (masterUser && !code) {
           sessionStorage.setItem('logged_master_name', masterUser.name);
-          sessionStorage.setItem('logged_master_user', masterUser.username); // لحفظ الدخول وتغيير كلمة السر
+          sessionStorage.setItem('logged_master_user', masterUser.username);
           sessionStorage.setItem('master_perms', JSON.stringify({
               annual: masterUser.canSellAnnual,
               trial: masterUser.canSellTrial,
