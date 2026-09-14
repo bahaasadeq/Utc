@@ -190,7 +190,6 @@
       <h2>UTC <span>Gate</span></h2>
       <p>بوابة الدخول الموحدة للمنظومة</p>
       <form onsubmit="handleLogin(event)">
-        <!-- خانة رمز الشركة (لضمان عزل البيانات بين الشركات) -->
         <input type="text" id="login-code" class="input-field" placeholder="Company Code / رمز الشركة (فارغ للمالك)" autocomplete="off">
         <input type="text" id="login-user" class="input-field" placeholder="User Name / اسم المستخدم أو الرقم السريع" autocomplete="off" required>
         <input type="password" id="login-pass" class="input-field" placeholder="Password / كلمة المرور" required>
@@ -200,9 +199,8 @@
         
         <div id="login-error" class="error-msg">البيانات غير صحيحة أو الترخيص معطل!</div>
         
-        <!-- معلومات الدعم الفني المطلوبة -->
         <div class="contact-footer">
-          للتواصل والدعم الفني :<br>
+          للتواصل والدعم الفني للإدارة العليا:<br>
           🇯🇴 +962799758747<br>
           bahaa.s.jod@gmail.com
         </div>
@@ -210,7 +208,7 @@
     </div>
   </div>
 
-  <!-- شاشة طلب تسجيل شركة جديدة (مضاف إليها أنا لست روبوت) -->
+  <!-- شاشة طلب تسجيل شركة جديدة (مع أنا لست روبوت) -->
   <div id="register-screen" class="overlay-screen" style="display: none;">
     <div class="auth-card">
       <h2>تسجيل <span>شركة جديدة</span></h2>
@@ -221,7 +219,6 @@
         <input type="tel" id="reg-comp-phone" class="input-field" placeholder="رقم هاتف التواصل" required>
         <input type="email" id="reg-comp-email" class="input-field" placeholder="البريد الإلكتروني الرسمي" required>
         
-        <!-- خانة أنا لست روبوت -->
         <div class="robot-check-container">
           <input type="checkbox" id="robot-check" required>
           <label for="robot-check">أنا لست روبوت (I'm not a robot)</label>
@@ -247,6 +244,24 @@
     </div>
   </div>
 
+  <!-- شاشة تعديل بيانات الشركة (جديد) -->
+  <div id="edit-license-screen" class="overlay-screen" style="display: none;">
+    <div class="auth-card">
+      <h2>تعديل <span>بيانات الشركة</span></h2>
+      <p style="font-size: 0.9rem;">يمكنك تعديل اسم الشركة، ورمزها الخاص، وبيانات دخول مدير الـ HR.</p>
+      <form onsubmit="submitEditLicense(event)">
+        <input type="hidden" id="edit-lic-key">
+        <div class="form-group"><label>اسم الشركة</label><input type="text" id="edit-comp-name" class="input-field" required></div>
+        <div class="form-group"><label>رمز الشركة (يستخدمه الموظفون للدخول)</label><input type="text" id="edit-comp-code" class="input-field" required></div>
+        <div class="form-group"><label>اسم مستخدم الـ HR</label><input type="text" id="edit-hr-user" class="input-field" required></div>
+        <div class="form-group"><label>كلمة مرور الـ HR</label><input type="text" id="edit-hr-pass" class="input-field" required></div>
+        
+        <button type="submit" class="btn-auth" style="background: var(--primary-master);">حفظ التعديلات</button>
+        <button type="button" onclick="document.getElementById('edit-license-screen').style.display='none';" style="background: none; border: none; color: var(--text-muted); margin-top: 15px; cursor: pointer; font-weight: bold;">إلغاء</button>
+      </form>
+    </div>
+  </div>
+
   <!-- طبقة التظليل للجوال -->
   <div id="mobile-overlay" class="mobile-overlay" onclick="toggleSidebar()"></div>
 
@@ -256,7 +271,6 @@
       <div class="brand">UTC <span style="color: var(--primary-master);">Master</span></div>
       <button class="nav-btn active" onclick="switchTab('master-licenses', 'master', this)">🏢 إدارة الشركات والرخص</button>
       <button class="nav-btn" onclick="switchTab('master-team', 'master', this)">👥 إدارة فريق النظام</button>
-      <!-- زر المحاسبة سيتم إخفاؤه برمجياً لمن لا يملك الصلاحية -->
       <button id="master-nav-accounting" class="nav-btn" onclick="switchTab('master-accounting', 'master', this)">💰 النظام المحاسبي (P&L)</button>
     </aside>
     <main>
@@ -269,7 +283,6 @@
           <button class="btn btn-danger" onclick="logout()">خروج</button>
         </div>
         
-        <!-- خانة البحث الشاملة -->
         <div class="global-search-container">
           <input type="text" class="global-search-input" placeholder="🔍 بحث شامل عن موظف (بالاسم أو الرقم)..." onkeyup="performGlobalSearch(this)">
           <div class="search-results-dropdown"></div>
@@ -291,7 +304,6 @@
                 </select>
               </div>
             </div>
-            <!-- خانات التعديل اليدوي للرمز السري وكلمة المرور -->
             <div class="grid-2">
               <div class="form-group"><label>رمز الشركة (آلي وقابل للتعديل) <span class="req">*</span></label><input type="text" id="new-company-code" class="input-field" required></div>
               <div class="form-group"><label>كلمة مرور مدير الـ HR (قابلة للتعديل) <span class="req">*</span></label><input type="text" id="new-company-pass" class="input-field" value="123456" required></div>
@@ -309,8 +321,19 @@
           </div>
         </section>
 
-        <!-- إدارة فريق النظام (ميزة جديدة للتحكم بصلاحيات مندوبي Master) -->
+        <!-- إدارة فريق النظام والصلاحيات وتغيير كلمة السر -->
         <section id="master-team" class="view-section">
+          
+          <div class="card" style="border-top: 4px solid var(--danger);">
+            <div class="card-title">تغيير كلمة المرور الخاصة بك (كأساس للنظام)</div>
+            <form onsubmit="changeMainPassword(event)">
+              <div class="grid-2">
+                <div class="form-group"><label>كلمة المرور الجديدة</label><input type="text" id="new-main-pass" class="input-field" required></div>
+              </div>
+              <button type="submit" class="btn btn-danger">💾 حفظ وإرسال نسخة للإيميل</button>
+            </form>
+          </div>
+
           <div class="card">
             <div class="card-title">إضافة مستخدم / مندوب جديد لإدارة النظام (Master User)</div>
             <div class="alert-box" style="background:#eff6ff; border-color:#bfdbfe; color:#1e40af;">
@@ -433,7 +456,6 @@
           </div>
         </div>
 
-        <!-- خانة البحث الشاملة (المعزولة للشركة) -->
         <div class="global-search-container">
           <input type="text" class="global-search-input" placeholder="🔍 بحث عن موظف (الاسم، الرقم الوظيفي، الرقم الوطني)..." onkeyup="performGlobalSearch(this)">
           <div class="search-results-dropdown"></div>
@@ -459,9 +481,9 @@
           </div>
         </section>
 
-        <!-- الإعدادات (الأقسام + البنوك المطورة) -->
+        <!-- الإعدادات -->
         <section id="hr-settings" class="view-section">
-          <div class="alert-box">⚙️ قم بتعريف الأقسام، المسميات الوظيفية، ودليل البنوك الخاص بشركتك لاستخدامها في ملف الموظف. كل شركة لها إعداداتها المعزولة والخاصة بها.</div>
+          <div class="alert-box">⚙️ قم بتعريف الأقسام، المسميات الوظيفية، ودليل البنوك الخاص بشركتك لاستخدامها في ملف الموظف. كل شركة لها إعداداتها المعزولة.</div>
           <div class="grid-2">
             <div class="card" style="margin-bottom: 0;">
               <h4 style="margin-bottom: 15px; color: var(--sidebar-hr);">الأقسام الرئيسية</h4>
@@ -479,7 +501,6 @@
               <div id="list-jobTitles" style="min-height: 80px;"></div>
             </div>
             
-            <!-- دليل البنوك والرموز المطور -->
             <div class="card" style="margin-bottom: 0;">
               <h4 style="margin-bottom: 15px; color: var(--sidebar-hr);">دليل البنوك والرموز</h4>
               <div style="display: flex; gap: 5px; margin-bottom: 15px;">
@@ -492,33 +513,29 @@
           </div>
         </section>
 
-        <!-- ملف الموظف الشامل -->
+        <!-- ملف الموظف -->
         <section id="hr-employee" class="view-section">
           <div class="card">
             <div class="card-title">إضافة موظف جديد شامل (قاعدة البيانات)</div>
             <div class="alert-box" style="background:#eff6ff; border-color:#bfdbfe; color:#1e40af;">
               💡 <strong>تنبيه:</strong> الحقول التي بجانبها نجمة حمراء (<span class="req">*</span>) إجبارية. 
-              <br>🔑 <strong>تعديل الرقم الوظيفي والدخول السريع:</strong> يمكنك التعديل يدوياً على الرقم الوظيفي المولد، ورقم الدخول السريع. سيرفض النظام أي رقم سريع مكرر لضمان عدم تداخل دخول الموظفين.
+              <br>🔑 <strong>الرقم الوظيفي والدخول السريع:</strong> يمكنك تعديلها يدوياً، وسيرفض النظام أي تكرار لضمان عدم تداخل الموظفين.
             </div>
             
             <form id="employee-form" onsubmit="saveNewEmployee(event)">
-              <!-- القسم 1: الهيكلة والدخول الذكي -->
               <h4 style="color: var(--sidebar-hr); border-bottom: 1px solid var(--border); padding-bottom: 5px; margin-bottom: 15px;">1. الهيكل الإداري وبيانات الدخول</h4>
               <div class="grid-4">
                 <div class="form-group"><label>القسم الرئيسي <span class="req">*</span></label><select id="emp-main-dept" class="input-field" onchange="generateEmpId()" required></select></div>
                 <div class="form-group"><label>القسم الفرعي <span class="req">*</span></label><select id="emp-sub-dept" class="input-field" onchange="generateEmpId()" required></select></div>
                 <div class="form-group"><label>المسمى الوظيفي <span class="req">*</span></label><select id="emp-job-title" class="input-field" required></select></div>
                 
-                <!-- الرقم الوظيفي قابل للتعديل -->
-                <div class="form-group"><label>الرقم الوظيفي <span class="req">*</span></label><input type="text" id="emp-id" class="input-field" style="font-weight:bold; color:var(--primary-hr);" required></div>
+                <div class="form-group"><label>الرقم الوظيفي (قابل للتعديل) <span class="req">*</span></label><input type="text" id="emp-id" class="input-field" style="font-weight:bold; color:var(--primary-hr);" required></div>
               </div>
               <div class="grid-4">
-                <!-- رقم الدخول السريع قابل للتعديل يدوياً -->
-                <div class="form-group"><label>رقم الدخول السريع (للموظف) <span class="req">*</span></label><input type="text" id="emp-short-id" class="input-field" title="رقم مختصر لدخول الموظف من هاتفه (يمكن تعديله يدوياً)" style="font-weight:bold; color:var(--primary-emp);" required></div>
+                <div class="form-group"><label>رقم الدخول السريع للموظف (قابل للتعديل) <span class="req">*</span></label><input type="text" id="emp-short-id" class="input-field" style="font-weight:bold; color:var(--primary-emp);" required></div>
                 <div class="form-group"><label>كلمة مرور بوابة الموظف <span class="req">*</span></label><input type="text" id="emp-pass" class="input-field" value="123456" required></div>
               </div>
 
-              <!-- القسم 2: الأسماء -->
               <h4 style="color: var(--sidebar-hr); border-bottom: 1px solid var(--border); padding-bottom: 5px; margin-bottom: 15px;">2. الأسماء الرسمية</h4>
               <div class="grid-3">
                 <div class="form-group"><label>الاسم الأول (عربي) <span class="req">*</span></label><input type="text" id="emp-name-ar1" class="input-field" required></div>
@@ -531,7 +548,6 @@
                 <div class="form-group"><label>Last Name (EN)</label><input type="text" id="emp-name-en3" class="input-field"></div>
               </div>
 
-              <!-- القسم 3: البيانات الشخصية -->
               <h4 style="color: var(--sidebar-hr); border-bottom: 1px solid var(--border); padding-bottom: 5px; margin-bottom: 15px;">3. البيانات الشخصية والاتصال</h4>
               <div class="grid-4">
                 <div class="form-group"><label>الرقم الوطني / الإقامة <span class="req">*</span></label><input type="text" id="emp-nid" class="input-field" required></div>
@@ -558,7 +574,6 @@
                 <div class="form-group"><label>هاتف الشركة (إن وجد)</label><input type="text" id="emp-workphone" class="input-field"></div>
               </div>
 
-              <!-- القسم 4: الطوارئ -->
               <h4 style="color: var(--danger); border-bottom: 1px solid var(--border); padding-bottom: 5px; margin-bottom: 15px;">4. الاتصال في حالات الطوارئ</h4>
               <div class="grid-3">
                 <div class="form-group"><label>اسم المعرف (ثلاثي) <span class="req">*</span></label><input type="text" id="emp-emg-name" class="input-field" required></div>
@@ -566,7 +581,6 @@
                 <div class="form-group"><label>هاتف طوارئ 2</label><input type="text" id="emp-emg-phone2" class="input-field"></div>
               </div>
 
-              <!-- القسم 5: المالية والبنك والمرفقات -->
               <h4 style="color: var(--accent); border-bottom: 1px solid var(--border); padding-bottom: 5px; margin-bottom: 15px;">5. المعطيات المالية، البنك، الضمان، وتوثيق العقود</h4>
               
               <div class="grid-4">
@@ -620,7 +634,7 @@
           </div>
         </section>
 
-        <!-- الحضور وتخصيص الموقع -->
+        <!-- الحضور -->
         <section id="hr-attendance" class="view-section">
           <div class="card">
             <div class="card-title">إعدادات النطاق الجغرافي للمقر (Geofencing) وتخصيص الموظفين</div>
@@ -668,9 +682,8 @@
           </div>
         </section>
 
-        <!-- محرك الرواتب الشامل + التصدير للبنوك -->
+        <!-- الرواتب -->
         <section id="hr-payroll" class="view-section">
-          
           <div class="card">
             <div class="card-title">محرك حساب الرواتب والخصومات الذكية (Smart Payroll)</div>
             <div class="grid-3" style="margin-bottom: 10px;">
@@ -680,7 +693,6 @@
               </div>
             </div>
             
-            <!-- الدخل -->
             <h4 style="margin: 15px 0 10px; color: var(--sidebar-hr); border-bottom: 1px solid #e2e8f0; padding-bottom: 5px;">1. الدخل الإجمالي</h4>
             <div class="grid-3">
               <div class="form-group"><label>الراتب الأساسي</label><input type="number" id="pay-basic" class="input-field" oninput="calcPay()"></div>
@@ -688,7 +700,6 @@
               <div class="form-group"><label>إجمالي الدخل الخاضع</label><input type="text" id="pay-gross" class="input-field" readonly></div>
             </div>
             
-            <!-- الضمان والضريبة -->
             <h4 style="margin: 15px 0 10px; color: var(--sidebar-hr); border-bottom: 1px solid #e2e8f0; padding-bottom: 5px;">2. الضمان الاجتماعي والضريبة</h4>
             <div class="grid-4">
               <div class="form-group"><label>خصم ضمان الموظف %</label><input type="number" step="0.01" id="pay-ss-rate" class="input-field" value="7.5" oninput="calcPay()"></div>
@@ -697,15 +708,12 @@
               <div class="form-group"><label>قيمة الضريبة</label><input type="text" id="pay-tax-amt" class="input-field" readonly style="color:var(--danger);"></div>
             </div>
             
-            <!-- مساهمة الشركة -->
             <div class="grid-2" style="background: #f8fafc; padding: 10px; border-radius: 8px; margin-bottom: 15px;">
               <div class="form-group"><label>نسبة ضمان الشركة (مساهمة لا تُخصم من الموظف) %</label><input type="number" step="0.01" id="pay-comp-ss-rate" class="input-field" value="14.25" oninput="calcPay()"></div>
               <div class="form-group"><label>تكلفة ضمان الشركة الكلية</label><input type="text" id="pay-comp-ss-amt" class="input-field" readonly style="color:var(--warning);"></div>
             </div>
 
-            <!-- التأخيرات -->
             <h4 style="margin: 15px 0 10px; color: var(--danger); border-bottom: 1px solid #e2e8f0; padding-bottom: 5px;">3. التأخيرات والخصومات الإدارية</h4>
-            <div style="background: #fef2f2; padding: 10px; border-radius: 8px; margin-bottom: 15px; color: #991b1b; font-weight:bold;">محرك التأخيرات: يُعادل التأخير بالأيام ويُخصم من الإجازات أولاً، والمتبقي يُخصم مالياً.</div>
             <div class="grid-4">
               <div class="form-group"><label>ساعات التأخير (هذا الشهر)</label><input type="number" id="pay-delay" class="input-field" value="0" oninput="calcPay()"></div>
               <div class="form-group"><label>رصيد إجازات الموظف (أيام)</label><input type="number" step="0.5" id="pay-leave-bal" class="input-field" value="14" oninput="calcPay()"></div>
@@ -718,7 +726,6 @@
               <div class="form-group"><label>سلف مقتطعة هذا الشهر</label><input type="number" id="pay-advance" class="input-field" value="0" oninput="calcPay()"></div>
             </div>
 
-            <!-- الملخص النهائي -->
             <div class="finance-summary">
               <div class="finance-item"><span>إجمالي الدخل</span><strong id="res-gross">0.00</strong></div>
               <div class="finance-item deduction"><span>إجمالي الخصومات</span><strong id="res-deduct">0.00</strong></div>
@@ -726,11 +733,8 @@
             </div>
           </div>
 
-          <!-- البطاقة المحدثة: تصدير الرواتب للبنوك أو نقداً -->
           <div class="card" style="border-top: 4px solid var(--accent);">
             <div class="card-title">تصدير مسير الرواتب (للبنك / للتوقيع النقدي)</div>
-            <p style="color:var(--text-muted); font-size:0.9rem; margin-bottom:15px;">يُظهر الجدول تفاصيل التحويل. في حال كان الراتب "نقداً" يظهر مكان مخصص لتوقيع الموظف بدلاً من البنك.</p>
-            
             <div class="table-responsive">
               <table id="bank-report-table">
                 <thead><tr><th>#</th><th>اسم الموظف</th><th>الرقم الوظيفي</th><th>طريقة التسليم</th><th>البنك (ورمزه)</th><th>IBAN</th><th>الصافي المحول</th><th>توقيع الموظف (للنقدي)</th></tr></thead>
@@ -746,10 +750,9 @@
               <button class="btn btn-secondary" onclick="window.print()">🖨️ طباعة الكشف للتوقيع</button>
             </div>
           </div>
-
         </section>
 
-        <!-- التقارير الفردية السرية -->
+        <!-- التقارير -->
         <section id="hr-reports" class="view-section">
           <div class="card">
             <div class="card-title">إصدار الكشوفات الفردية السرية للطباعة</div>
@@ -761,7 +764,6 @@
               <button class="btn btn-hr" onclick="generateReport()">توليد التقرير السري</button>
               <button class="btn btn-secondary" onclick="window.print()">🖨️ طباعة (PDF)</button>
             </div>
-
             <div id="printable-area" style="display: none; border: 1px solid var(--border); padding: 24px; border-radius: 8px; margin-top: 20px; background: #fff;">
               <h2 style="text-align: center; border-bottom: 2px solid #0f172a; padding-bottom: 10px;">كشف موظف (سري)</h2>
               <div style="display: flex; justify-content: space-between; background: #f8fafc; padding: 15px; margin-bottom: 20px; font-weight: bold;">
@@ -801,7 +803,6 @@
           <button class="btn btn-danger" onclick="logout()">خروج</button>
         </div>
         
-        <!-- خانة البحث الشاملة (للموظف للبحث عن زميل) -->
         <div class="global-search-container">
           <input type="text" class="global-search-input" placeholder="🔍 بحث عن زميل (الاسم، الرقم)..." onkeyup="performGlobalSearch(this)">
           <div class="search-results-dropdown"></div>
@@ -846,20 +847,13 @@
   </div>
 
   <script>
-    // ================= تهيئة قاعدة البيانات المحلية مع عزل الشركات (Multi-Tenancy) وفرق Master =================
+    // ================= تهيئة قاعدة البيانات المحلية =================
     if (!localStorage.getItem('utc_db')) {
       const initialDB = {
-        licenses: [], transactions: [], activeHRKey: null, globalCounter: 1000, employees: [],
-        settings: {},
+        licenses: [], transactions: [], activeHRKey: null, globalCounter: 1000, employees: [], settings: {},
         masterUsers: [{
-            id: 'MU-1',
-            name: 'المدير العام',
-            username: 'utc_admin',
-            password: 'Admin@2026',
-            canSellAnnual: true,
-            canSellTrial: true,
-            canViewAccounting: true,
-            isSuper: true
+            id: 'MU-1', name: 'المدير العام', username: 'utc_admin', password: 'Admin@2026',
+            canSellAnnual: true, canSellTrial: true, canViewAccounting: true, isSuper: true
         }]
       };
       localStorage.setItem('utc_db', JSON.stringify(initialDB));
@@ -873,33 +867,23 @@
               canSellAnnual: true, canSellTrial: true, canViewAccounting: true, isSuper: true
           }];
       }
-      
-      if(db.licenses.length > 0 && !db.licenses[0].companyCode) {
-         let fallbackCode = "C1000";
-         db.licenses[0].companyCode = fallbackCode;
-         db.licenses[0].hrUser = "hr";
-         db.licenses[0].hrPass = "1000";
-         db.employees.forEach(e => { if(!e.companyCode) e.companyCode = fallbackCode; });
-      }
       localStorage.setItem('utc_db', JSON.stringify(db));
     }
 
     function getDB() { return JSON.parse(localStorage.getItem('utc_db')); }
     function saveDB(db) { localStorage.setItem('utc_db', JSON.stringify(db)); }
 
-    // التحكم بالقائمة الجانبية في الهاتف
     function toggleSidebar() {
       document.querySelectorAll('aside').forEach(el => el.classList.toggle('open'));
       document.getElementById('mobile-overlay').classList.toggle('active');
     }
 
-    // تحديث الساعة في واجهة الموظف
     setInterval(() => {
       const el = document.getElementById('live-clock');
       if(el) el.innerText = new Date().toLocaleTimeString('ar-EG', {hour12: false});
     }, 1000);
 
-    // ================= دالة إرسال بريد طلب تسجيل شركة جديدة مع فحص الروبوت =================
+    // ================= التسجيل (الشركات الجديدة) =================
     function showRegisterScreen() {
       document.getElementById('login-screen').style.display = 'none';
       document.getElementById('register-screen').style.display = 'flex';
@@ -912,7 +896,6 @@
 
     function sendRegistrationEmail(e) {
       e.preventDefault();
-      
       const isNotRobot = document.getElementById('robot-check').checked;
       if(!isNotRobot) { alert('الرجاء التأكيد بأنك لست روبوت.'); return; }
 
@@ -927,7 +910,7 @@
       hideRegisterScreen();
     }
 
-    // ================= دالة البحث الشاملة (Global Search) =================
+    // ================= البحث =================
     function performGlobalSearch(inputEl) {
       const query = inputEl.value.trim().toLowerCase();
       const dropdown = inputEl.nextElementSibling;
@@ -983,7 +966,7 @@
         alert(`تم اعتماد الموقع (${locName}) وتخصيصه لـ: ${targetName} بنجاح!`);
     }
 
-    // ================= 1. تسجيل الدخول الذكي والمعزول =================
+    // ================= الدخول =================
     function handleLogin(event) {
       event.preventDefault();
       const code = document.getElementById('login-code').value.trim();
@@ -993,10 +976,11 @@
       document.getElementById('login-error').style.display = 'none';
       let db = getDB();
 
-      // 1. فحص إدارة المالك والصلاحيات (Master Users RBAC)
+      // فحص المالك
       let masterUser = db.masterUsers.find(u => u.username === user && u.password === pass);
       if (masterUser && !code) {
           sessionStorage.setItem('logged_master_name', masterUser.name);
+          sessionStorage.setItem('logged_master_user', masterUser.username); // لحفظ الدخول وتغيير كلمة السر
           sessionStorage.setItem('master_perms', JSON.stringify({
               annual: masterUser.canSellAnnual,
               trial: masterUser.canSellTrial,
@@ -1007,14 +991,7 @@
           return;
       }
       
-      // دعم يوزر master القديم للضرورة
-      if (user.toLowerCase() === "master" && pass === "1000" && !code) {
-          sessionStorage.setItem('logged_master_name', "المدير العام (Legacy)");
-          sessionStorage.setItem('master_perms', JSON.stringify({ annual: true, trial: true, acc: true, isSuper: true }));
-          openMasterPortal(); return; 
-      }
-      
-      // 2. فحص مدير الـ HR للشركة 
+      // فحص مدير الـ HR 
       let matchedLicense = db.licenses.find(l => l.companyCode === code && l.hrUser === user && l.hrPass === pass && l.status === 'active');
       if(matchedLicense) {
           sessionStorage.setItem('current_company_code', code);
@@ -1022,7 +999,7 @@
           return;
       }
       
-      // 3. فحص الموظفين داخل الشركة
+      // فحص الموظفين 
       let matchedEmp = db.employees.find(e => e.companyCode === code && (e.shortId === user || e.id === user) && e.password === pass);
       if (matchedEmp) {
         let empLicense = db.licenses.find(l => l.companyCode === code && l.status === 'active');
@@ -1034,16 +1011,6 @@
         }
       } 
       
-      // دخول تجريبي عام
-      else if (user.toLowerCase() === "emp" && pass === "1000") { 
-        sessionStorage.setItem('logged_emp_name', "موظف تجريبي");
-        document.getElementById('login-screen').style.display = 'none';
-        document.getElementById('emp-portal').style.display = 'flex';
-        document.getElementById('app-body').className = 'emp-mode';
-        document.getElementById('logged-emp-name-display').innerText = "موظف تجريبي";
-        return;
-      }
-
       document.getElementById('login-error').style.display = 'block';
     }
 
@@ -1055,6 +1022,7 @@
       document.getElementById('master-portal').style.display = 'none';
       document.getElementById('hr-portal').style.display = 'none';
       document.getElementById('emp-portal').style.display = 'none';
+      document.getElementById('edit-license-screen').style.display = 'none';
       document.getElementById('activation-screen').style.display = 'none';
       document.getElementById('login-screen').style.display = 'flex';
       document.getElementById('app-body').className = '';
@@ -1108,7 +1076,7 @@
       }
     }
 
-    // ================= 3. بوابة المالك (Master) بصلاحيات (RBAC) =================
+    // ================= المالك (Master) =================
     function openMasterPortal() {
       document.getElementById('login-screen').style.display = 'none';
       document.getElementById('master-portal').style.display = 'flex';
@@ -1116,11 +1084,9 @@
       
       document.getElementById('logged-master-name').innerText = sessionStorage.getItem('logged_master_name') || 'مدير النظام';
       
-      // تطبيق الصلاحيات
       let permsStr = sessionStorage.getItem('master_perms');
       let perms = permsStr ? JSON.parse(permsStr) : { annual: true, trial: true, acc: true, isSuper: true };
       
-      // إخفاء/إظهار تبويب المحاسبة
       const accNavBtn = document.getElementById('master-nav-accounting');
       if(!perms.acc) {
           accNavBtn.style.display = 'none';
@@ -1129,7 +1095,6 @@
           accNavBtn.style.display = 'block';
       }
 
-      // تعديل خيارات البيع
       const durSelect = document.getElementById('new-license-duration');
       durSelect.innerHTML = '';
       if(perms.trial) {
@@ -1140,7 +1105,6 @@
           durSelect.innerHTML += '<option value="365">اشتراك سنوي</option>';
       }
       
-      // توليد رقم شركة عشوائي مبدئي
       if(!document.getElementById('new-company-code').value) {
           document.getElementById('new-company-code').value = Math.floor(1000 + Math.random() * 9000).toString();
       }
@@ -1148,7 +1112,23 @@
       renderLicensesTable(); calculateAndRenderAccounting(); renderMasterUsersTable();
     }
 
-    // إدارة فريق النظام (صلاحيات المندوبين)
+    function changeMainPassword(e) {
+      e.preventDefault();
+      let newPass = document.getElementById('new-main-pass').value;
+      let db = getDB();
+      let currentUser = sessionStorage.getItem('logged_master_user') || 'utc_admin';
+      let userIndex = db.masterUsers.findIndex(u => u.username === currentUser);
+      if (userIndex === -1) userIndex = 0; 
+      db.masterUsers[userIndex].password = newPass;
+      saveDB(db);
+      alert("تم تغيير كلمة المرور بنجاح. سيتم نقلك لإرسالها عبر الإيميل كنسخة احتياطية.");
+      
+      let emailBody = `مرحباً،\n\nتم تغيير كلمة المرور الرئيسية بنجاح.\n\nبيانات الدخول الجديدة:\nالمستخدم: ${db.masterUsers[userIndex].username}\nكلمة المرور: ${newPass}\n\nمع التحية.`;
+      window.location.href = `mailto:bahaa.s.jod@gmail.com?subject=بيانات الدخول الجديدة - Master&body=${encodeURIComponent(emailBody)}`;
+      document.getElementById('new-main-pass').value = '';
+      renderMasterUsersTable();
+    }
+
     function saveMasterUser(e) {
       e.preventDefault();
       let permsStr = sessionStorage.getItem('master_perms');
@@ -1202,62 +1182,88 @@
               if(u.canSellTrial) permsText.push("تجريبي");
               if(u.canViewAccounting) permsText.push("حسابات");
           }
-          
           let delBtn = u.isSuper ? `<span style="color:#94a3b8; font-size:0.8rem;">محمي</span>` : `<button class="btn btn-danger" onclick="deleteMasterUser('${u.id}')" style="padding:4px 8px; font-size:0.8rem;">حذف</button>`;
-          
-          tbody.innerHTML += `<tr>
-            <td style="font-weight:bold;">${u.name}</td>
-            <td style="font-family:monospace; color:var(--primary-master);">${u.username}</td>
-            <td style="font-family:monospace;">${u.password}</td>
-            <td style="font-size:0.85rem; color:#475569;">${permsText.join('، ')}</td>
-            <td>${delBtn}</td>
-          </tr>`;
+          tbody.innerHTML += `<tr><td style="font-weight:bold;">${u.name}</td><td style="font-family:monospace; color:var(--primary-master);">${u.username}</td><td style="font-family:monospace;">${u.password}</td><td style="font-size:0.85rem; color:#475569;">${permsText.join('، ')}</td><td>${delBtn}</td></tr>`;
        });
     }
 
-    // توليد رخص الشركات المعزولة
+    // توليد رخص الشركات وتعديلها
     function generateAndSaveLicense() {
       const comp = document.getElementById('new-company-name').value;
       const durSelect = document.getElementById('new-license-duration');
       if(!durSelect.options.length) { alert('ليس لديك صلاحيات لبيع تراخيص حالياً.'); return; }
       const dur = durSelect.value;
-      
       const codeInput = document.getElementById('new-company-code').value.trim();
       const passInput = document.getElementById('new-company-pass').value.trim();
 
-      if(!comp || !codeInput || !passInput) {
-        alert("يرجى تعبئة كافة الحقول (الاسم، الرمز، وكلمة المرور)!"); return;
-      }
+      if(!comp || !codeInput || !passInput) { alert("يرجى تعبئة كافة الحقول!"); return; }
       
       let db = getDB(); 
-      if(db.licenses.some(l => l.companyCode === codeInput)) {
-        alert("رمز الشركة مستخدم لشركة أخرى، يرجى كتابة رمز مختلف!"); return;
-      }
+      if(db.licenses.some(l => l.companyCode === codeInput)) { alert("رمز الشركة محجوز لشركة أخرى!"); return; }
 
       db.globalCounter++; 
-      
       const companyCode = codeInput;
       const hrUser = "hr" + companyCode;
       const hrPass = passInput;
       
       const newLicense = {
         serial: `UTC-V${db.globalCounter}`, 
-        company: comp, 
-        duration: dur,
-        companyCode: companyCode,
-        hrUser: hrUser,
-        hrPass: hrPass,
+        company: comp, duration: dur, companyCode: companyCode, hrUser: hrUser, hrPass: hrPass,
         key: `UTC-${dur}D-${Math.random().toString(36).substring(2,6).toUpperCase()}-${Math.random().toString(36).substring(2,6).toUpperCase()}`,
-        timestamp: Date.now(), 
-        date: new Date().toLocaleDateString('ar-EG'), 
-        status: 'active'
+        timestamp: Date.now(), date: new Date().toLocaleDateString('ar-EG'), status: 'active'
       };
       db.licenses.push(newLicense); saveDB(db);
-      alert(`تم توليد الترخيص.\nيرجى تزويد العميل بالبيانات التالية للدخول:\nرمز الشركة: ${companyCode}\nاسم المستخدم: ${hrUser}\nكلمة المرور: ${hrPass}`); 
+      alert(`تم التوليد بنجاح!\nرمز الشركة: ${companyCode}\nيوزر: ${hrUser}\nالباسورد: ${hrPass}`); 
       document.getElementById('new-company-name').value = '';
       document.getElementById('new-company-code').value = Math.floor(1000 + Math.random() * 9000).toString();
-      document.getElementById('new-company-pass').value = '123456';
       renderLicensesTable();
+    }
+
+    // نافذة تعديل بيانات الشركة
+    function openEditLicense(key) {
+      let db = getDB();
+      let lic = db.licenses.find(l => l.key === key);
+      if(!lic) return;
+      document.getElementById('edit-lic-key').value = key;
+      document.getElementById('edit-comp-name').value = lic.company;
+      document.getElementById('edit-comp-code').value = lic.companyCode;
+      document.getElementById('edit-hr-user').value = lic.hrUser;
+      document.getElementById('edit-hr-pass').value = lic.hrPass;
+      document.getElementById('edit-license-screen').style.display = 'flex';
+    }
+
+    function submitEditLicense(e) {
+      e.preventDefault();
+      let key = document.getElementById('edit-lic-key').value;
+      let newComp = document.getElementById('edit-comp-name').value.trim();
+      let newCode = document.getElementById('edit-comp-code').value.trim();
+      let newHrUser = document.getElementById('edit-hr-user').value.trim();
+      let newHrPass = document.getElementById('edit-hr-pass').value.trim();
+
+      let db = getDB();
+      let lic = db.licenses.find(l => l.key === key);
+      if(!lic) return;
+      
+      if (newCode !== lic.companyCode && db.licenses.some(l => l.companyCode === newCode && l.key !== key)) {
+          alert("رمز الشركة محجوز لشركة أخرى!"); return;
+      }
+
+      let oldCode = lic.companyCode;
+      lic.company = newComp; lic.companyCode = newCode; lic.hrUser = newHrUser; lic.hrPass = newHrPass;
+
+      if(oldCode !== newCode) {
+          db.employees.forEach(emp => { if(emp.companyCode === oldCode) emp.companyCode = newCode; });
+          ['mainDepts', 'subDepts', 'jobTitles', 'banks'].forEach(type => {
+              if(db.settings[type+'_'+oldCode]) {
+                  db.settings[type+'_'+newCode] = db.settings[type+'_'+oldCode];
+                  delete db.settings[type+'_'+oldCode];
+              }
+          });
+      }
+      saveDB(db);
+      document.getElementById('edit-license-screen').style.display = 'none';
+      renderLicensesTable();
+      alert("تم تحديث وتعديل بيانات الشركة بنجاح.");
     }
 
     function changeLicenseStatus(key, newStatus) {
@@ -1266,390 +1272,167 @@
     }
 
     function deleteLicense(key) {
-      if(confirm("حذف نهائي؟")) {
-        let db = getDB(); db.licenses = db.licenses.filter(l => l.key !== key);
-        saveDB(db); renderLicensesTable();
-      }
+      if(confirm("حذف نهائي؟")) { let db = getDB(); db.licenses = db.licenses.filter(l => l.key !== key); saveDB(db); renderLicensesTable(); }
     }
 
     function renderLicensesTable() {
       const db = getDB(); const tbody = document.getElementById('licenses-table-body'); tbody.innerHTML = '';
       db.licenses.forEach(lic => {
         let statusHtml = lic.status === 'active' ? `<span class="status-badge" style="background:#dcfce7; color:#166534;">نشط</span>` : 
-                         lic.status === 'paused' ? `<span class="status-badge" style="background:#fef08a; color:#854d0e;">معطل</span>` :
-                         `<span class="status-badge" style="background:#fee2e2; color:#991b1b;">موقوف</span>`;
-        let actionBtns = lic.status === 'active' ? `<button class="btn btn-warning" onclick="changeLicenseStatus('${lic.key}', 'paused')" style="padding:6px; font-size:0.8rem; margin:2px;">تعطيل</button><button class="btn btn-danger" onclick="deleteLicense('${lic.key}')" style="padding:6px; font-size:0.8rem; margin:2px;">حذف</button>` :
-                         `<button class="btn btn-success" onclick="changeLicenseStatus('${lic.key}', 'active')" style="padding:6px; font-size:0.8rem; margin:2px;">تفعيل</button><button class="btn btn-danger" onclick="deleteLicense('${lic.key}')" style="padding:6px; font-size:0.8rem; margin:2px;">حذف</button>`;
+                         lic.status === 'paused' ? `<span class="status-badge" style="background:#fef08a; color:#854d0e;">معطل</span>` : `<span class="status-badge" style="background:#fee2e2; color:#991b1b;">موقوف</span>`;
+        let actionBtns = lic.status === 'active' ? 
+            `<button class="btn btn-secondary" onclick="openEditLicense('${lic.key}')" style="padding:6px; font-size:0.8rem; margin:2px;">تعديل</button><button class="btn btn-warning" onclick="changeLicenseStatus('${lic.key}', 'paused')" style="padding:6px; font-size:0.8rem; margin:2px;">تعطيل</button><button class="btn btn-danger" onclick="deleteLicense('${lic.key}')" style="padding:6px; font-size:0.8rem; margin:2px;">حذف</button>` :
+            `<button class="btn btn-secondary" onclick="openEditLicense('${lic.key}')" style="padding:6px; font-size:0.8rem; margin:2px;">تعديل</button><button class="btn btn-success" onclick="changeLicenseStatus('${lic.key}', 'active')" style="padding:6px; font-size:0.8rem; margin:2px;">تفعيل</button><button class="btn btn-danger" onclick="deleteLicense('${lic.key}')" style="padding:6px; font-size:0.8rem; margin:2px;">حذف</button>`;
         tbody.innerHTML += `<tr><td><span class="badge-code">${lic.companyCode || '-'}</span></td><td style="font-weight:bold;">${lic.company}</td><td><span style="font-family:monospace; color:var(--primary-hr); font-weight:bold;">${lic.hrUser || '-'} / ${lic.hrPass || '-'}</span></td><td><span class="badge-code">${lic.key}</span></td><td>${lic.duration}</td><td>${statusHtml}</td><td>${actionBtns}</td></tr>`;
       });
     }
 
-    // المحاسبة الخاصة بالمالك (Master)
     function addTransaction() {
       let db = getDB();
-      db.transactions.push({
-        id: "VCH-" + Math.floor(Math.random() * 10000),
-        type: document.getElementById('trans-type').value,
-        amount: parseFloat(document.getElementById('trans-amount').value),
-        method: document.getElementById('trans-method').value,
-        desc: document.getElementById('trans-desc').value,
-        date: document.getElementById('trans-date').value
-      });
-      saveDB(db); document.getElementById('trans-amount').value = ''; document.getElementById('trans-desc').value = '';
-      calculateAndRenderAccounting();
+      db.transactions.push({ id: "VCH-" + Math.floor(Math.random() * 10000), type: document.getElementById('trans-type').value, amount: parseFloat(document.getElementById('trans-amount').value), method: document.getElementById('trans-method').value, desc: document.getElementById('trans-desc').value, date: document.getElementById('trans-date').value });
+      saveDB(db); document.getElementById('trans-amount').value = ''; document.getElementById('trans-desc').value = ''; calculateAndRenderAccounting();
     }
 
     function calculateAndRenderAccounting() {
       const db = getDB(); const tbody = document.getElementById('transactions-table-body'); tbody.innerHTML = '';
-      let totalIn = 0, totalOut = 0, receivables = 0;
-      const methods = { "cash": "نقدي", "check": "شيك", "credit": "ذمم" };
-
+      let totalIn = 0, totalOut = 0, receivables = 0; const methods = { "cash": "نقدي", "check": "شيك", "credit": "ذمم" };
       db.transactions.forEach(t => {
         let amt = parseFloat(t.amount);
-        if (t.type === 'in') { t.method === 'credit' ? receivables += amt : totalIn += amt; } 
-        else if (t.type === 'out') { if (t.method !== 'credit') totalOut += amt; }
-
+        if (t.type === 'in') { t.method === 'credit' ? receivables += amt : totalIn += amt; } else if (t.type === 'out') { if (t.method !== 'credit') totalOut += amt; }
         let typeHtml = t.type === 'in' ? `<span class="type-in">قبض (+)</span>` : `<span class="type-out">صرف (-)</span>`;
         tbody.innerHTML += `<tr><td><span class="badge-code" style="background:#e2e8f0; color:#334155; letter-spacing:0;">${t.id}</span></td><td>${t.date}</td><td>${typeHtml}</td><td style="font-weight:600;">${t.desc}</td><td>${methods[t.method]||'-'}</td><td style="font-weight:800; color:${t.type==='in'?'#166534':'#991b1b'};">${amt.toLocaleString()}</td></tr>`;
       });
-      
-      let netBal = totalIn - totalOut;
-      document.getElementById('acc-total-in').innerText = totalIn.toLocaleString();
-      document.getElementById('acc-total-out').innerText = totalOut.toLocaleString();
-      document.getElementById('acc-receivables').innerText = receivables.toLocaleString();
-      document.getElementById('acc-net-balance').innerText = netBal.toLocaleString();
-      
-      let taxRate = parseFloat(document.getElementById('master-tax-rate').value) || 0;
-      let taxAmount = netBal > 0 ? netBal * (taxRate / 100) : 0;
-      document.getElementById('acc-final-profit').innerText = (netBal - taxAmount > 0) ? (netBal - taxAmount).toLocaleString() : "0.00";
+      let netBal = totalIn - totalOut; document.getElementById('acc-total-in').innerText = totalIn.toLocaleString(); document.getElementById('acc-total-out').innerText = totalOut.toLocaleString(); document.getElementById('acc-receivables').innerText = receivables.toLocaleString(); document.getElementById('acc-net-balance').innerText = netBal.toLocaleString();
+      let taxRate = parseFloat(document.getElementById('master-tax-rate').value) || 0; let taxAmount = netBal > 0 ? netBal * (taxRate / 100) : 0; document.getElementById('acc-final-profit').innerText = (netBal - taxAmount > 0) ? (netBal - taxAmount).toLocaleString() : "0.00";
     }
 
-    // ================= 4. إعدادات الهيكل المعزولة للشركات (HR) =================
+    // ================= 4. إعدادات الهيكل للشركات =================
     function addSetting(type) {
-      let db = getDB(); 
-      let val = document.getElementById(`input-${type}`).value.trim();
-      
-      if(type === 'banks') {
-        let code = document.getElementById('input-bank-code').value.trim();
-        if(!val || !code) { alert('أدخل اسم ورمز البنك'); return; }
-        val = `${val} (${code})`; 
-      }
-
+      let db = getDB(); let val = document.getElementById(`input-${type}`).value.trim();
+      if(type === 'banks') { let code = document.getElementById('input-bank-code').value.trim(); if(!val || !code) { alert('أدخل اسم ورمز البنك'); return; } val = `${val} (${code})`; }
       if(!val) return; 
-      
-      let currentCode = sessionStorage.getItem('current_company_code');
-      let targetKey = type + '_' + currentCode;
-      
-      if(!db.settings[targetKey]) db.settings[targetKey] = [];
-      db.settings[targetKey].push(val); 
-      saveDB(db);
-      
-      document.getElementById(`input-${type}`).value = '';
-      if(type === 'banks') document.getElementById('input-bank-code').value = '';
-      
-      loadSettingsData();
+      let currentCode = sessionStorage.getItem('current_company_code'); let targetKey = type + '_' + currentCode;
+      if(!db.settings[targetKey]) db.settings[targetKey] = []; db.settings[targetKey].push(val); saveDB(db);
+      document.getElementById(`input-${type}`).value = ''; if(type === 'banks') document.getElementById('input-bank-code').value = ''; loadSettingsData();
     }
-
-    function removeSetting(type, index) { 
-      let db = getDB(); 
-      let currentCode = sessionStorage.getItem('current_company_code');
-      let targetKey = type + '_' + currentCode;
-      if(db.settings[targetKey]) {
-          db.settings[targetKey].splice(index, 1); 
-          saveDB(db); 
-          loadSettingsData(); 
-      }
-    }
-
+    function removeSetting(type, index) { let db = getDB(); let currentCode = sessionStorage.getItem('current_company_code'); let targetKey = type + '_' + currentCode; if(db.settings[targetKey]) { db.settings[targetKey].splice(index, 1); saveDB(db); loadSettingsData(); } }
     function loadSettingsData() {
-      let db = getDB();
-      let currentCode = sessionStorage.getItem('current_company_code');
-      
+      let db = getDB(); let currentCode = sessionStorage.getItem('current_company_code');
       ['mainDepts', 'subDepts', 'jobTitles', 'banks'].forEach(type => {
-         let html = '';
-         let targetKey = type + '_' + currentCode;
-         let settingArr = db.settings[targetKey] || [];
-         
-         settingArr.forEach((val, i) => {
-            html += `<div style="display:flex; justify-content:space-between; background:#f1f5f9; padding:8px 12px; margin-bottom:5px; border-radius:6px; align-items:center;"><span style="font-weight:bold; color:var(--sidebar-hr);">${val}</span><button type="button" onclick="removeSetting('${type}', ${i})" style="color:var(--danger); background:none; border:none; cursor:pointer; font-weight:bold;">حذف</button></div>`;
-         });
-         
+         let html = ''; let settingArr = db.settings[type + '_' + currentCode] || [];
+         settingArr.forEach((val, i) => { html += `<div style="display:flex; justify-content:space-between; background:#f1f5f9; padding:8px 12px; margin-bottom:5px; border-radius:6px; align-items:center;"><span style="font-weight:bold; color:var(--sidebar-hr);">${val}</span><button type="button" onclick="removeSetting('${type}', ${i})" style="color:var(--danger); background:none; border:none; cursor:pointer; font-weight:bold;">حذف</button></div>`; });
          if(document.getElementById(`list-${type}`)) document.getElementById(`list-${type}`).innerHTML = html;
       });
-
-      const mSel = document.getElementById('emp-main-dept'); 
-      const sSel = document.getElementById('emp-sub-dept'); 
-      const jSel = document.getElementById('emp-job-title');
-      const bSel = document.getElementById('emp-bank');
-
-      if(mSel) mSel.innerHTML = '<option value="" disabled selected>-- القسم الرئيسي --</option>';
-      if(sSel) sSel.innerHTML = '<option value="" disabled selected>-- القسم الفرعي --</option>';
-      if(jSel) jSel.innerHTML = '<option value="" disabled selected>-- المسمى الوظيفي --</option>';
-      if(bSel) bSel.innerHTML = '<option value="" disabled selected>-- اختر البنك --</option>';
-
+      const mSel = document.getElementById('emp-main-dept'); const sSel = document.getElementById('emp-sub-dept'); const jSel = document.getElementById('emp-job-title'); const bSel = document.getElementById('emp-bank');
+      if(mSel) mSel.innerHTML = '<option value="" disabled selected>-- القسم الرئيسي --</option>'; if(sSel) sSel.innerHTML = '<option value="" disabled selected>-- القسم الفرعي --</option>'; if(jSel) jSel.innerHTML = '<option value="" disabled selected>-- المسمى الوظيفي --</option>'; if(bSel) bSel.innerHTML = '<option value="" disabled selected>-- اختر البنك --</option>';
       if(db.settings['mainDepts_' + currentCode]) db.settings['mainDepts_' + currentCode].forEach((val, i) => { if(mSel) mSel.innerHTML += `<option value="${String(i+1).padStart(2, '0')}">${val}</option>`; });
       if(db.settings['subDepts_' + currentCode]) db.settings['subDepts_' + currentCode].forEach((val, i) => { if(sSel) sSel.innerHTML += `<option value="${String(i+1).padStart(2, '0')}">${val}</option>`; });
       if(db.settings['jobTitles_' + currentCode]) db.settings['jobTitles_' + currentCode].forEach((val) => { if(jSel) jSel.innerHTML += `<option value="${val}">${val}</option>`; });
       if(db.settings['banks_' + currentCode]) db.settings['banks_' + currentCode].forEach((val) => { if(bSel) bSel.innerHTML += `<option value="${val}">${val}</option>`; });
-
+      generateEmpId(); 
     }
 
-    // ================= 5. إدارة الموظفين المعزولة (HR) =================
+    // ================= 5. الموظفين =================
     function toggleBankDetails() {
-      let method = document.getElementById('emp-payment-method').value;
-      let bankEl = document.getElementById('emp-bank');
-      let ibanEl = document.getElementById('emp-iban');
-      if(method === 'bank') {
-        bankEl.required = true; ibanEl.required = true;
-        bankEl.disabled = false; ibanEl.disabled = false;
-      } else {
-        bankEl.required = false; ibanEl.required = false;
-        bankEl.disabled = true; ibanEl.disabled = true;
-        bankEl.value = ''; ibanEl.value = '';
-      }
+      let method = document.getElementById('emp-payment-method').value; let bankEl = document.getElementById('emp-bank'); let ibanEl = document.getElementById('emp-iban');
+      if(method === 'bank') { bankEl.required = true; ibanEl.required = true; bankEl.disabled = false; ibanEl.disabled = false; } else { bankEl.required = false; ibanEl.required = false; bankEl.disabled = true; ibanEl.disabled = true; bankEl.value = ''; ibanEl.value = ''; }
     }
-
     function generateEmpId() {
-      const main = document.getElementById('emp-main-dept');
-      const sub = document.getElementById('emp-sub-dept');
-      let currentCode = sessionStorage.getItem('current_company_code');
-      let db = getDB();
-      
+      const main = document.getElementById('emp-main-dept'); const sub = document.getElementById('emp-sub-dept');
+      let currentCode = sessionStorage.getItem('current_company_code'); let db = getDB();
       if(main && sub && main.value && sub.value) {
-        let mVal = main.value;
-        let sVal = sub.value;
+        let mVal = main.value; let sVal = sub.value;
         let compEmployees = db.employees.filter(e => e.companyCode === currentCode);
-        let empCount = compEmployees.length + 1;
-        let serialStr = String(empCount).padStart(3, '0');
-        
         let idField = document.getElementById('emp-id');
-        if(!idField.value || idField.value.includes('UTC-0000')) {
-            idField.value = `UTC-${mVal}${sVal}-${serialStr}`;
-        }
+        if(!idField.value || idField.value.includes('UTC-0000')) { idField.value = `UTC-${mVal}${sVal}-${String(compEmployees.length + 1).padStart(3, '0')}`; }
       }
-      
       let shortIdInput = document.getElementById('emp-short-id');
-      if (!shortIdInput.value) {
-          shortIdInput.value = `${Math.floor(1000 + Math.random() * 9000)}`;
-      }
+      if (!shortIdInput.value) { shortIdInput.value = `${Math.floor(1000 + Math.random() * 9000)}`; }
     }
-
     function calculateAge() {
-      const dobInput = document.getElementById('emp-dob').value;
-      if (!dobInput) return;
-      const birthDate = new Date(dobInput);
-      let age = new Date().getFullYear() - birthDate.getFullYear();
-      document.getElementById('age-display').value = `${age} سنة`;
+      const dobInput = document.getElementById('emp-dob').value; if (!dobInput) return;
+      document.getElementById('age-display').value = `${new Date().getFullYear() - new Date(dobInput).getFullYear()} سنة`;
     }
-
     function saveNewEmployee(e) {
       e.preventDefault();
-      if(!document.getElementById('emp-main-dept').value || !document.getElementById('emp-payment-method').value) { 
-        alert("تأكد من اختيار الأقسام وطريقة الدفع!"); return; 
-      }
+      if(!document.getElementById('emp-main-dept').value || !document.getElementById('emp-payment-method').value) { alert("تأكد من الأقسام وطريقة الدفع!"); return; }
+      let db = getDB(); let currentCode = sessionStorage.getItem('current_company_code');
+      let shortIdVal = document.getElementById('emp-short-id').value.trim(); let empIdVal = document.getElementById('emp-id').value.trim();
+      if(db.employees.some(emp => emp.companyCode === currentCode && emp.shortId === shortIdVal)) { alert("رقم الدخول السريع مستخدم مسبقاً لموظف آخر!"); return; }
+      if(db.employees.some(emp => emp.companyCode === currentCode && emp.id === empIdVal)) { alert("الرقم الوظيفي مستخدم مسبقاً!"); return; }
+      let natVal = document.getElementById('emp-nationality').value; if(natVal === 'other') natVal = document.getElementById('emp-nationality-other').value.trim();
 
-      let db = getDB();
-      let currentCode = sessionStorage.getItem('current_company_code');
-      let shortIdVal = document.getElementById('emp-short-id').value.trim();
-      let empIdVal = document.getElementById('emp-id').value.trim();
-
-      // حماية لمنع تكرار رقم الدخول السريع أو الرقم الوظيفي داخل نفس الشركة فقط
-      let isShortIdExists = db.employees.some(emp => emp.companyCode === currentCode && emp.shortId === shortIdVal);
-      if(isShortIdExists) {
-        alert("⚠️ عذراً، رقم الدخول السريع (" + shortIdVal + ") مستخدم مسبقاً لموظف آخر. يرجى إدخال رقم مختلف.");
-        return; 
-      }
-      
-      let isEmpIdExists = db.employees.some(emp => emp.companyCode === currentCode && emp.id === empIdVal);
-      if(isEmpIdExists) {
-        alert("⚠️ عذراً، الرقم الوظيفي (" + empIdVal + ") مستخدم مسبقاً. يرجى تعديله.");
-        return; 
-      }
-
-      let nationalityVal = document.getElementById('emp-nationality').value;
-      if(nationalityVal === 'other') {
-          nationalityVal = document.getElementById('emp-nationality-other').value.trim();
-      }
-
-      const newEmp = {
-        companyCode: currentCode, // عزل البيانات للشركة
-        id: empIdVal, 
-        shortId: shortIdVal,
-        password: document.getElementById('emp-pass').value,
+      db.employees.push({
+        companyCode: currentCode, id: empIdVal, shortId: shortIdVal, password: document.getElementById('emp-pass').value,
         name: `${document.getElementById('emp-name-ar1').value} ${document.getElementById('emp-name-ar2').value} ${document.getElementById('emp-name-ar3').value}`.trim(),
-        nid: document.getElementById('emp-nid').value,
-        nationality: nationalityVal,
-        gender: document.getElementById('emp-gender').value,
-        dob: document.getElementById('emp-dob').value,
-        residence: document.getElementById('emp-residence').value,
-        phone: document.getElementById('emp-phone').value,
-        email: document.getElementById('emp-email').value,
-        jobTitle: document.getElementById('emp-job-title').value || '-',
-        salary: parseFloat(document.getElementById('emp-salary').value) || 0,
-        allowance: parseFloat(document.getElementById('emp-allowance').value) || 0,
-        paymentMethod: document.getElementById('emp-payment-method').value,
-        bank: document.getElementById('emp-bank').value || '',
-        iban: document.getElementById('emp-iban').value || '',
-        empSsn: document.getElementById('emp-ssn').value,
-        compSsn: document.getElementById('emp-comp-ssn').value,
-        ssRate: parseFloat(document.getElementById('emp-ss-rate').value) || 7.5
-      };
-      
-      db.employees.push(newEmp); saveDB(db);
-      alert('تم حفظ واعتماد الموظف. يستطيع الآن الدخول لتبصيم الدوام برقمه السريع!');
-      e.target.reset(); 
-      document.getElementById('emp-short-id').value = ''; 
-      document.getElementById('emp-id').value = '';
-      loadHRData(); 
+        nid: document.getElementById('emp-nid').value, nationality: natVal, gender: document.getElementById('emp-gender').value,
+        dob: document.getElementById('emp-dob').value, residence: document.getElementById('emp-residence').value, phone: document.getElementById('emp-phone').value,
+        email: document.getElementById('emp-email').value, jobTitle: document.getElementById('emp-job-title').value || '-',
+        salary: parseFloat(document.getElementById('emp-salary').value) || 0, allowance: parseFloat(document.getElementById('emp-allowance').value) || 0,
+        paymentMethod: document.getElementById('emp-payment-method').value, bank: document.getElementById('emp-bank').value || '', iban: document.getElementById('emp-iban').value || '',
+        empSsn: document.getElementById('emp-ssn').value, compSsn: document.getElementById('emp-comp-ssn').value, ssRate: parseFloat(document.getElementById('emp-ss-rate').value) || 7.5
+      });
+      saveDB(db); alert('تم حفظ واعتماد الموظف!'); e.target.reset(); document.getElementById('emp-short-id').value = ''; document.getElementById('emp-id').value = ''; generateEmpId(); loadHRData(); 
     }
-
     function loadHRData() {
-      const db = getDB();
-      const currentCode = sessionStorage.getItem('current_company_code');
-      const compEmployees = db.employees.filter(e => e.companyCode === currentCode);
-      
-      document.getElementById('stat-total-emp').innerText = compEmployees.length;
-      document.getElementById('stat-total-salary').innerText = compEmployees.reduce((sum, emp) => sum + emp.salary + emp.allowance, 0).toLocaleString();
-
+      const db = getDB(); const currentCode = sessionStorage.getItem('current_company_code'); const compEmployees = db.employees.filter(e => e.companyCode === currentCode);
+      document.getElementById('stat-total-emp').innerText = compEmployees.length; document.getElementById('stat-total-salary').innerText = compEmployees.reduce((sum, emp) => sum + emp.salary + emp.allowance, 0).toLocaleString();
       const tbody = document.getElementById('employees-table-body'); tbody.innerHTML = '';
       compEmployees.forEach(emp => {
         let methodText = emp.paymentMethod === 'bank' ? 'بنكي' : (emp.paymentMethod === 'cash' ? 'نقداً' : 'شيك');
         tbody.innerHTML += `<tr><td><span class="badge-code" style="background:#e2e8f0; color:#334155;">${emp.id}</span><br><span style="font-size:0.8rem; color:var(--primary-emp); font-weight:bold;">دخول: ${emp.shortId}</span></td><td style="font-weight:bold;">${emp.name}</td><td><span class="status-badge" style="background:#f1f5f9; color:#0f172a;">${methodText}</span></td><td>${emp.bank || '-'}</td><td style="font-family:monospace;">${emp.iban || '-'}</td><td>${emp.salary}</td></tr>`;
       });
-
       const pSel = document.getElementById('payroll-emp-select'); const rSel = document.getElementById('report-emp-select');
-      pSel.innerHTML = '<option value="" disabled selected>-- اختر الموظف --</option>'; rSel.innerHTML = '<option value="" disabled selected>-- اختر الموظف --</option>';
-      
-      const geoSelect = document.getElementById('geo-emp-select');
-      if(geoSelect) geoSelect.innerHTML = '<option value="all">جميع الموظفين (عام)</option>';
-
-      compEmployees.forEach(emp => {
-        const opt = `<option value="${emp.id}">${emp.name} (${emp.id})</option>`;
-        pSel.innerHTML += opt; rSel.innerHTML += opt;
-        if(geoSelect) geoSelect.innerHTML += opt;
-      });
+      pSel.innerHTML = '<option value="" disabled selected>-- الموظف --</option>'; rSel.innerHTML = '<option value="" disabled selected>-- الموظف --</option>';
+      const geoSelect = document.getElementById('geo-emp-select'); if(geoSelect) geoSelect.innerHTML = '<option value="all">الجميع</option>';
+      compEmployees.forEach(emp => { const opt = `<option value="${emp.id}">${emp.name} (${emp.id})</option>`; pSel.innerHTML += opt; rSel.innerHTML += opt; if(geoSelect) geoSelect.innerHTML += opt; });
     }
 
-    // محرك الرواتب
+    // ================= الرواتب =================
     function loadEmpPayrollData() {
-      const db = getDB();
-      const currentCode = sessionStorage.getItem('current_company_code');
-      const compEmployees = db.employees.filter(e => e.companyCode === currentCode);
-      const emp = compEmployees.find(e => e.id === document.getElementById('payroll-emp-select').value);
-      if(emp) {
-        document.getElementById('pay-basic').value = emp.salary;
-        document.getElementById('pay-allowance').value = emp.allowance;
-        document.getElementById('pay-ss-rate').value = emp.ssRate;
-        calcPay(); 
-      }
+      const emp = getDB().employees.filter(e => e.companyCode === sessionStorage.getItem('current_company_code')).find(e => e.id === document.getElementById('payroll-emp-select').value);
+      if(emp) { document.getElementById('pay-basic').value = emp.salary; document.getElementById('pay-allowance').value = emp.allowance; document.getElementById('pay-ss-rate').value = emp.ssRate; calcPay(); }
     }
-
     function calcPay() {
-      let b = parseFloat(document.getElementById('pay-basic').value) || 0;
-      let a = parseFloat(document.getElementById('pay-allowance').value) || 0;
-      let ssRate = parseFloat(document.getElementById('pay-ss-rate').value) || 0;
-      let compSsRate = parseFloat(document.getElementById('pay-comp-ss-rate').value) || 0;
-      let taxRate = parseFloat(document.getElementById('pay-tax-rate').value) || 0;
-      
-      let gross = b + a;
-      document.getElementById('pay-gross').value = gross.toFixed(2);
-      let hRate = (gross / 30) / 8;
-      
-      let ssEmpAmt = gross * (ssRate/100);
-      let ssCompAmt = gross * (compSsRate/100);
-      let taxAmt = gross * (taxRate/100);
-
-      document.getElementById('pay-ss-emp-amt').value = ssEmpAmt.toFixed(2);
-      document.getElementById('pay-comp-ss-amt').value = ssCompAmt.toFixed(2);
-      document.getElementById('pay-tax-amt').value = taxAmt.toFixed(2);
-      
-      let dHrs = parseFloat(document.getElementById('pay-delay').value) || 0;
-      let lBal = parseFloat(document.getElementById('pay-leave-bal').value) || 0;
-      let dDays = dHrs / 8;
-      
-      let leaveDed = 0; let salDed = 0;
-      if (dDays <= lBal) { leaveDed = dDays; } 
-      else { leaveDed = lBal; salDed = ((dDays - lBal) * 8) * hRate; }
-
-      document.getElementById('pay-leave-deduct').value = leaveDed.toFixed(2);
-      document.getElementById('pay-delay-amt').value = salDed.toFixed(2);
-      
-      let discAmt = (parseFloat(document.getElementById('pay-disc').value) || 0) * (gross / 30);
-      let adv = parseFloat(document.getElementById('pay-advance').value) || 0;
-
-      let totalDed = ssEmpAmt + taxAmt + salDed + discAmt + adv;
-      let net = gross - totalDed;
-
-      document.getElementById('res-gross').innerText = gross.toFixed(2);
-      document.getElementById('res-deduct').innerText = totalDed.toFixed(2);
-      document.getElementById('res-net').innerText = net > 0 ? net.toFixed(2) : "0.00";
+      let b = parseFloat(document.getElementById('pay-basic').value) || 0; let a = parseFloat(document.getElementById('pay-allowance').value) || 0; let ssRate = parseFloat(document.getElementById('pay-ss-rate').value) || 0; let compSsRate = parseFloat(document.getElementById('pay-comp-ss-rate').value) || 0; let taxRate = parseFloat(document.getElementById('pay-tax-rate').value) || 0;
+      let gross = b + a; document.getElementById('pay-gross').value = gross.toFixed(2); let hRate = (gross / 30) / 8;
+      let ssEmpAmt = gross * (ssRate/100); let ssCompAmt = gross * (compSsRate/100); let taxAmt = gross * (taxRate/100);
+      document.getElementById('pay-ss-emp-amt').value = ssEmpAmt.toFixed(2); document.getElementById('pay-comp-ss-amt').value = ssCompAmt.toFixed(2); document.getElementById('pay-tax-amt').value = taxAmt.toFixed(2);
+      let dHrs = parseFloat(document.getElementById('pay-delay').value) || 0; let lBal = parseFloat(document.getElementById('pay-leave-bal').value) || 0; let dDays = dHrs / 8;
+      let leaveDed = 0; let salDed = 0; if (dDays <= lBal) { leaveDed = dDays; } else { leaveDed = lBal; salDed = ((dDays - lBal) * 8) * hRate; }
+      document.getElementById('pay-leave-deduct').value = leaveDed.toFixed(2); document.getElementById('pay-delay-amt').value = salDed.toFixed(2);
+      let discAmt = (parseFloat(document.getElementById('pay-disc').value) || 0) * (gross / 30); let adv = parseFloat(document.getElementById('pay-advance').value) || 0;
+      let totalDed = ssEmpAmt + taxAmt + salDed + discAmt + adv; let net = gross - totalDed;
+      document.getElementById('res-gross').innerText = gross.toFixed(2); document.getElementById('res-deduct').innerText = totalDed.toFixed(2); document.getElementById('res-net').innerText = net > 0 ? net.toFixed(2) : "0.00";
     }
 
-    // تصدير البنوك المعزول
+    // تصدير البنوك
     function generateBankReport() {
-      const db = getDB();
-      const currentCode = sessionStorage.getItem('current_company_code');
-      const compEmployees = db.employees.filter(e => e.companyCode === currentCode);
-      const tbody = document.getElementById('bank-report-body');
-      tbody.innerHTML = '';
-      
-      if(compEmployees.length === 0) {
-        tbody.innerHTML = '<tr><td colspan="8" style="text-align:center;">لا يوجد موظفين مسجلين لشركتكم</td></tr>';
-        return;
-      }
-
+      const compEmployees = getDB().employees.filter(e => e.companyCode === sessionStorage.getItem('current_company_code'));
+      const tbody = document.getElementById('bank-report-body'); tbody.innerHTML = '';
+      if(compEmployees.length === 0) { tbody.innerHTML = '<tr><td colspan="8" style="text-align:center;">لا يوجد موظفين</td></tr>'; return; }
       compEmployees.forEach((emp, index) => {
-        let gross = (emp.salary || 0) + (emp.allowance || 0);
-        let ssAmt = gross * ((emp.ssRate || 7.5)/100);
-        let taxAmt = gross * 0.02; // ضريبة قياسية للتصدير السريع
-        let net = gross - ssAmt - taxAmt;
-        
+        let net = ((emp.salary || 0) + (emp.allowance || 0)) * (1 - ((emp.ssRate || 7.5)/100) - 0.02);
         let payMethodText = emp.paymentMethod === 'cash' ? 'نقداً' : (emp.paymentMethod === 'check' ? 'شيك' : 'تحويل بنكي');
-        let signature = emp.paymentMethod === 'bank' ? '-' : '_________________';
-
-        tbody.innerHTML += `<tr>
-          <td>${index + 1}</td>
-          <td style="font-weight:bold;">${emp.name}</td>
-          <td>${emp.id}</td>
-          <td><span class="status-badge" style="background:#f1f5f9; color:#0f172a;">${payMethodText}</span></td>
-          <td>${emp.bank || '-'}</td>
-          <td style="font-family:monospace;">${emp.iban || '-'}</td>
-          <td style="color:var(--accent); font-weight:bold; font-size:1.1rem;">${net.toFixed(2)} د.أ</td>
-          <td style="color:var(--text-muted);">${signature}</td>
-        </tr>`;
+        tbody.innerHTML += `<tr><td>${index + 1}</td><td style="font-weight:bold;">${emp.name}</td><td>${emp.id}</td><td><span class="status-badge" style="background:#f1f5f9; color:#0f172a;">${payMethodText}</span></td><td>${emp.bank || '-'}</td><td style="font-family:monospace;">${emp.iban || '-'}</td><td style="color:var(--accent); font-weight:bold; font-size:1.1rem;">${net.toFixed(2)} د.أ</td><td style="color:var(--text-muted);">${emp.paymentMethod === 'bank' ? '-' : '_________________'}</td></tr>`;
       });
     }
-
     function exportBankToEmail() {
-      const db = getDB();
-      const currentCode = sessionStorage.getItem('current_company_code');
-      const compEmployees = db.employees.filter(e => e.companyCode === currentCode);
-      if(compEmployees.length === 0) { alert('لا يوجد بيانات للتصدير.'); return; }
-
-      let emailBody = "السادة البنك المحترمين،\n\nنرفق لكم كشف رواتب الموظفين المعتمد للتحويل:\n\n";
-      
-      compEmployees.forEach((emp, index) => {
+      const compEmployees = getDB().employees.filter(e => e.companyCode === sessionStorage.getItem('current_company_code'));
+      if(compEmployees.length === 0) { alert('لا يوجد بيانات.'); return; }
+      let emailBody = "السادة البنك المحترمين،\n\nنرفق لكم كشف الرواتب:\n\n";
+      compEmployees.forEach((emp, i) => {
         if(emp.paymentMethod === 'bank') { 
-          let gross = (emp.salary || 0) + (emp.allowance || 0);
-          let ssAmt = gross * ((emp.ssRate || 7.5)/100);
-          let taxAmt = gross * 0.02; 
-          let net = gross - ssAmt - taxAmt;
-          
-          emailBody += `${index + 1}. الاسم: ${emp.name} | البنك: ${emp.bank} | IBAN: ${emp.iban} | الصافي: ${net.toFixed(2)} د.أ\n`;
+          let net = ((emp.salary || 0) + (emp.allowance || 0)) * (1 - ((emp.ssRate || 7.5)/100) - 0.02);
+          emailBody += `${i + 1}. الاسم: ${emp.name} | البنك: ${emp.bank} | IBAN: ${emp.iban} | الصافي: ${net.toFixed(2)} د.أ\n`;
         }
       });
-
-      emailBody += "\nشاكرين تعاونكم.\nإدارة الموارد البشرية.";
-      const encodedBody = encodeURIComponent(emailBody);
-      window.location.href = `mailto:?subject=كشف تحويل رواتب الموظفين (معتمد)&body=${encodedBody}`;
+      window.location.href = `mailto:?subject=كشف التحويل البنكي&body=${encodeURIComponent(emailBody + "\nمع التحية.")}`;
     }
-
     function generateReport() {
-      const sel = document.getElementById('report-emp-select');
-      if(!sel.value) { alert("اختر موظف!"); return; }
-      const text = sel.options[sel.selectedIndex].text;
-      document.getElementById('rep-name').innerText = "الاسم: " + text.split(' (')[0];
-      document.getElementById('rep-id').innerText = "الرقم: " + text.split(' (')[1].replace(')','');
+      const sel = document.getElementById('report-emp-select'); if(!sel.value) return;
+      document.getElementById('rep-name').innerText = "الاسم: " + sel.options[sel.selectedIndex].text.split(' (')[0];
+      document.getElementById('rep-id').innerText = "الرقم: " + sel.options[sel.selectedIndex].text.split(' (')[1].replace(')','');
       document.getElementById('printable-area').style.display = 'block';
     }
   </script>
