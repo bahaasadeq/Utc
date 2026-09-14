@@ -179,6 +179,12 @@
     
     .perm-checkbox { display: flex; align-items: center; gap: 8px; cursor: pointer; font-weight: 600; font-size: 0.9rem; }
     .perm-checkbox input { width: 18px; height: 18px; cursor: pointer; }
+    
+    /* Archive Table Styles */
+    .log-type-login { color: #2563eb; font-weight:bold; }
+    .log-type-add { color: #059669; font-weight:bold; }
+    .log-type-edit { color: #d97706; font-weight:bold; }
+    .log-type-delete { color: #dc2626; font-weight:bold; }
   </style>
 </head>
 <body id="app-body">
@@ -189,7 +195,7 @@
       <h2>UTC <span>Gate</span></h2>
       <p>بوابة الدخول الموحدة للمنظومة</p>
       <form onsubmit="handleLogin(event)">
-        <!-- الخانات مدمجة لتسهيل الدخول كما طلبت (بدون رمز الشركة) -->
+        <!-- الخانات مدمجة لتسهيل حفظ المتصفحات للهواتف، خانتين فقط -->
         <input type="text" id="login-user" class="input-field" placeholder="اسم المستخدم أو رقم الدخول (HR/موظف/مالك)" autocomplete="off" required>
         <input type="password" id="login-pass" class="input-field" placeholder="كلمة المرور" required>
         
@@ -199,7 +205,7 @@
         <div id="login-error" class="error-msg">البيانات غير صحيحة أو الترخيص معطل!</div>
         
         <div class="contact-footer">
-          للتواصل والدعم الفني:<br>
+          للتواصل والدعم الفني للإدارة العليا:<br>
           🇯🇴 +962799758747<br>
           bahaa.s.jod@gmail.com
         </div>
@@ -272,6 +278,7 @@
       <button class="nav-btn active" onclick="switchTab('master-licenses', 'master', this)">🏢 إدارة الشركات والرخص</button>
       <button class="nav-btn" onclick="switchTab('master-team', 'master', this)">👥 إدارة فريق النظام</button>
       <button id="master-nav-accounting" class="nav-btn" onclick="switchTab('master-accounting', 'master', this)">💰 النظام المحاسبي (P&L)</button>
+      <button class="nav-btn" onclick="switchTab('master-archive', 'master', this)">🗄️ الأرشيف والنسخ الاحتياطي</button>
     </aside>
     <main>
       <header>
@@ -427,6 +434,31 @@
             </div>
           </div>
         </section>
+
+        <!-- الأرشيف للمالك -->
+        <section id="master-archive" class="view-section">
+          <div class="card">
+            <div class="card-title">🗄️ سجل حركات النظام (Audit Trail)</div>
+            <p style="font-size:0.9rem; color:var(--text-muted); margin-bottom:15px;">يعرض هذا السجل كافة حركات الدخول والإضافات والتعديلات على مستوى المنظومة والشركات.</p>
+            <div class="table-responsive" style="max-height: 400px;">
+              <table>
+                <thead style="position: sticky; top: 0;"><tr><th>التاريخ والوقت</th><th>المستخدم</th><th>نوع الحركة</th><th>البيان</th><th>رمز الشركة</th></tr></thead>
+                <tbody id="master-logs-tbody"></tbody>
+              </table>
+            </div>
+          </div>
+
+          <div class="card" style="border-top: 4px solid var(--accent);">
+            <div class="card-title">💾 النسخ الاحتياطي التلقائي (Auto Backup)</div>
+            <p style="font-size:0.9rem; color:var(--text-muted); margin-bottom:15px;">يأخذ النظام نسخة احتياطية يومية لكافة البيانات ويحتفظ بآخر 30 يوماً. يمكنك استعادة النظام لأي نقطة سابقة من هنا.</p>
+            <div class="table-responsive">
+              <table>
+                <thead><tr><th>تاريخ النسخة</th><th>توقيت أخذ النسخة</th><th>الإجراء</th></tr></thead>
+                <tbody id="master-backups-tbody"></tbody>
+              </table>
+            </div>
+          </div>
+        </section>
       </div>
     </main>
   </div>
@@ -442,6 +474,7 @@
       <button class="nav-btn" onclick="switchTab('hr-leaves', 'hr', this)">📅 الإجازات والموافقات</button>
       <button class="nav-btn" onclick="switchTab('hr-payroll', 'hr', this)">💳 الرواتب وتصدير البنوك</button>
       <button class="nav-btn" onclick="switchTab('hr-reports', 'hr', this)">🖨️ التقارير السرية</button>
+      <button class="nav-btn" onclick="switchTab('hr-archive', 'hr', this)">🗄️ سجل النظام</button>
     </aside>
     <main>
       <header>
@@ -456,7 +489,6 @@
           </div>
         </div>
 
-        <!-- خانة البحث الشاملة (المعزولة للشركة) -->
         <div class="global-search-container">
           <input type="text" class="global-search-input" placeholder="🔍 بحث عن موظف (الاسم، الرقم الوظيفي، الرقم الوطني)..." onkeyup="performGlobalSearch(this)">
           <div class="search-results-dropdown"></div>
@@ -486,7 +518,7 @@
           </div>
         </section>
 
-        <!-- الإعدادات (الأقسام + البنوك المطورة) -->
+        <!-- الإعدادات -->
         <section id="hr-settings" class="view-section">
           <div class="alert-box">⚙️ قم بتعريف الأقسام، المسميات الوظيفية، ودليل البنوك الخاص بشركتك لاستخدامها في ملف الموظف. كل شركة لها إعداداتها المعزولة والخاصة بها.</div>
           <div class="grid-2">
@@ -524,11 +556,10 @@
             <div class="card-title">إضافة موظف جديد شامل (قاعدة البيانات)</div>
             <div class="alert-box" style="background:#eff6ff; border-color:#bfdbfe; color:#1e40af;">
               💡 <strong>تنبيه:</strong> الحقول التي بجانبها نجمة حمراء (<span class="req">*</span>) إجبارية. 
-              <br>🔑 <strong>تعديل الرقم الوظيفي والدخول السريع:</strong> يمكنك التعديل يدوياً على الرقم الوظيفي المولد، ورقم الدخول السريع. يتم الترقيم التلقائي مع إضافة الموظفين للشركة الحالية.
+              <br>🔑 <strong>تعديل الرقم الوظيفي والدخول السريع:</strong> يمكنك التعديل يدوياً، وسيرفض النظام أي رقم سريع مكرر لضمان عدم التداخل. يتم الترقيم التلقائي مع الأقسام.
             </div>
             
             <form id="employee-form" onsubmit="saveNewEmployee(event)">
-              <!-- القسم 1: الهيكلة والدخول الذكي -->
               <h4 style="color: var(--sidebar-hr); border-bottom: 1px solid var(--border); padding-bottom: 5px; margin-bottom: 15px;">1. الهيكل الإداري وبيانات الدخول</h4>
               <div class="grid-4">
                 <div class="form-group"><label>القسم الرئيسي <span class="req">*</span></label><select id="emp-main-dept" class="input-field" onchange="generateEmpId()" required></select></div>
@@ -542,7 +573,6 @@
                 <div class="form-group"><label>كلمة مرور بوابة الموظف <span class="req">*</span></label><input type="text" id="emp-pass" class="input-field" value="123456" required></div>
               </div>
 
-              <!-- القسم 2: الأسماء -->
               <h4 style="color: var(--sidebar-hr); border-bottom: 1px solid var(--border); padding-bottom: 5px; margin-bottom: 15px;">2. الأسماء الرسمية</h4>
               <div class="grid-3">
                 <div class="form-group"><label>الاسم الأول (عربي) <span class="req">*</span></label><input type="text" id="emp-name-ar1" class="input-field" required></div>
@@ -555,7 +585,6 @@
                 <div class="form-group"><label>Last Name (EN)</label><input type="text" id="emp-name-en3" class="input-field"></div>
               </div>
 
-              <!-- القسم 3: البيانات الشخصية -->
               <h4 style="color: var(--sidebar-hr); border-bottom: 1px solid var(--border); padding-bottom: 5px; margin-bottom: 15px;">3. البيانات الشخصية والاتصال</h4>
               <div class="grid-4">
                 <div class="form-group"><label>الرقم الوطني / الإقامة <span class="req">*</span></label><input type="text" id="emp-nid" class="input-field" required></div>
@@ -582,7 +611,6 @@
                 <div class="form-group"><label>هاتف الشركة (إن وجد)</label><input type="text" id="emp-workphone" class="input-field"></div>
               </div>
 
-              <!-- القسم 4: الطوارئ -->
               <h4 style="color: var(--danger); border-bottom: 1px solid var(--border); padding-bottom: 5px; margin-bottom: 15px;">4. الاتصال في حالات الطوارئ</h4>
               <div class="grid-3">
                 <div class="form-group"><label>اسم المعرف (ثلاثي) <span class="req">*</span></label><input type="text" id="emp-emg-name" class="input-field" required></div>
@@ -590,7 +618,6 @@
                 <div class="form-group"><label>هاتف طوارئ 2</label><input type="text" id="emp-emg-phone2" class="input-field"></div>
               </div>
 
-              <!-- القسم 5: المالية والبنك والمرفقات -->
               <h4 style="color: var(--accent); border-bottom: 1px solid var(--border); padding-bottom: 5px; margin-bottom: 15px;">5. المعطيات المالية، البنك، الضمان، وتوثيق العقود</h4>
               
               <div class="grid-4">
@@ -766,7 +793,7 @@
           </div>
         </section>
 
-        <!-- التقارير الفردية السرية -->
+        <!-- التقارير -->
         <section id="hr-reports" class="view-section">
           <div class="card">
             <div class="card-title">إصدار الكشوفات الفردية السرية للطباعة</div>
@@ -778,7 +805,6 @@
               <button class="btn btn-hr" onclick="generateReport()">توليد التقرير السري</button>
               <button class="btn btn-secondary" onclick="window.print()">🖨️ طباعة (PDF)</button>
             </div>
-
             <div id="printable-area" style="display: none; border: 1px solid var(--border); padding: 24px; border-radius: 8px; margin-top: 20px; background: #fff;">
               <h2 style="text-align: center; border-bottom: 2px solid #0f172a; padding-bottom: 10px;">كشف موظف (سري)</h2>
               <div style="display: flex; justify-content: space-between; background: #f8fafc; padding: 15px; margin-bottom: 20px; font-weight: bold;">
@@ -792,6 +818,20 @@
               <div style="margin-top: 40px; display: flex; justify-content: space-between; color: var(--text-muted);">
                 <div>توقيع الـ HR: __________________</div><div>توقيع الموظف: __________________</div>
               </div>
+            </div>
+          </div>
+        </section>
+
+        <!-- أرشيف الـ HR -->
+        <section id="hr-archive" class="view-section">
+          <div class="card">
+            <div class="card-title">🗄️ سجل حركات الشركة (Audit Trail)</div>
+            <p style="font-size:0.9rem; color:var(--text-muted); margin-bottom:15px;">يُظهر هذا السجل جميع الحركات التي تمت في شركتك فقط.</p>
+            <div class="table-responsive" style="max-height: 400px;">
+              <table>
+                <thead style="position: sticky; top: 0;"><tr><th>التاريخ والوقت</th><th>المستخدم</th><th>نوع الحركة</th><th>البيان</th></tr></thead>
+                <tbody id="hr-logs-tbody"></tbody>
+              </table>
             </div>
           </div>
         </section>
@@ -818,7 +858,6 @@
           <button class="btn btn-danger" onclick="logout()">خروج</button>
         </div>
         
-        <!-- خانة البحث الشاملة -->
         <div class="global-search-container">
           <input type="text" class="global-search-input" placeholder="🔍 بحث عن زميل (الاسم، الرقم)..." onkeyup="performGlobalSearch(this)">
           <div class="search-results-dropdown"></div>
@@ -829,13 +868,13 @@
         <section id="emp-dashboard" class="view-section active">
           <div class="card" style="text-align: center; max-width: 500px; margin: 0 auto;">
             <h2 style="margin-bottom: 10px; color: var(--sidebar-emp);">تسجيل الحضور والانصراف</h2>
-            <div class="punch-circle" onclick="alert('تم تسجيل البصمة بنجاح في النظام!')">
+            <div class="punch-circle" onclick="logAction('تسجيل بصمة الدوام', 'login'); alert('تم تسجيل البصمة بنجاح في النظام!')">
               <div class="clock-display" id="live-clock">00:00:00</div>
               <div style="font-weight: 700;">اضغط للتبصيم</div>
             </div>
             <div style="display: flex; gap: 10px; justify-content: center; margin-top: 20px;">
-              <button class="btn" style="background: #f59e0b; color: white;" onclick="alert('تم بدء الاستراحة')">☕ بدء الغداء</button>
-              <button class="btn" style="background: #10b981; color: white;" onclick="alert('تم العودة للعمل')">✔️ إنهاء الغداء</button>
+              <button class="btn" style="background: #f59e0b; color: white;" onclick="logAction('بدء استراحة غداء', 'edit'); alert('تم بدء الاستراحة')">☕ بدء الغداء</button>
+              <button class="btn" style="background: #10b981; color: white;" onclick="logAction('انتهاء استراحة غداء', 'edit'); alert('تم العودة للعمل')">✔️ إنهاء الغداء</button>
             </div>
           </div>
         </section>
@@ -854,7 +893,7 @@
             <div class="form-group" style="margin-top: 15px;">
               <label>المرفق (إن وجد)</label><input type="file" class="input-field" style="margin:0;">
             </div>
-            <button class="btn btn-emp" style="width: 100%; margin-top: 15px;" onclick="alert('تم إرسال الطلب لمدير الموارد البشرية للموافقة')">إرسال الطلب</button>
+            <button class="btn btn-emp" style="width: 100%; margin-top: 15px;" onclick="logAction('تقديم طلب إجازة', 'add'); alert('تم إرسال الطلب لمدير الموارد البشرية للموافقة')">إرسال الطلب</button>
           </div>
         </section>
 
@@ -863,13 +902,13 @@
   </div>
 
   <script>
-    // ================= تهيئة قاعدة البيانات المحلية الذكية جداً =================
-    // هذه الدالة ستقوم بإصلاح أي خلل من الإصدارات القديمة وتمنع انهيار النظام
+    // ================= تهيئة قاعدة البيانات المحلية ونظام النسخ الاحتياطي والسجلات =================
     try {
       let dbStr = localStorage.getItem('utc_db');
       if (!dbStr) {
         const initialDB = {
           licenses: [], transactions: [], activeHRKey: null, globalCounter: 1000, employees: [], settings: {},
+          logs: [], backups: [], // سجلات النظام والنسخ الاحتياطي
           masterUsers: [{
               id: 'MU-1', name: 'المدير العام', username: 'utc_admin', password: 'Admin@2026',
               canSellAnnual: true, canSellTrial: true, canViewAccounting: true, isSuper: true
@@ -885,6 +924,8 @@
         if(!db.employees) db.employees = [];
         if(!db.settings) db.settings = {};
         if(!db.globalCounter) db.globalCounter = 1000;
+        if(!db.logs) db.logs = [];
+        if(!db.backups) db.backups = [];
         
         if(!db.masterUsers || !Array.isArray(db.masterUsers) || db.masterUsers.length === 0) {
             db.masterUsers = [{
@@ -893,20 +934,21 @@
             }];
         }
         
-        // إصلاح الرخص القديمة التي لا تحتوي على اسم مستخدم
         db.licenses.forEach((lic, i) => {
             if(!lic.companyCode) lic.companyCode = "C" + (1000 + i);
             if(!lic.hrUser) lic.hrUser = "hr" + (i===0?"":i);
             if(!lic.hrPass) lic.hrPass = "1000";
         });
         
-        // إصلاح الموظفين القدامى بدون أرقام دخول سريعة
         db.employees.forEach((emp, i) => {
             if(!emp.companyCode && db.licenses.length > 0) emp.companyCode = db.licenses[0].companyCode;
             if(!emp.shortId) emp.shortId = (1000 + i).toString();
         });
 
         localStorage.setItem('utc_db', JSON.stringify(db));
+        
+        // أخذ نسخة احتياطية يومية عند فتح النظام
+        createDailyBackup(db);
       }
     } catch(e) {
       console.error("Local Storage Error, resetting...", e);
@@ -914,10 +956,101 @@
 
     function getDB() { 
       let db = JSON.parse(localStorage.getItem('utc_db'));
-      if (!db) return { licenses: [], transactions: [], employees: [], settings: {}, masterUsers: [] };
+      if (!db) return { licenses: [], transactions: [], employees: [], settings: {}, masterUsers: [], logs: [], backups: [] };
       return db;
     }
     function saveDB(db) { localStorage.setItem('utc_db', JSON.stringify(db)); }
+
+    // ================= نظام الرقابة والأرشيف (جديد) =================
+    function logAction(actionDesc, typeClass = 'info', compCodeOverride = null) {
+      let db = getDB();
+      let user = sessionStorage.getItem('logged_master_name') || sessionStorage.getItem('logged_emp_name') || 'مدير النظام (HR)';
+      let code = compCodeOverride || sessionStorage.getItem('current_company_code') || 'Master';
+      
+      db.logs.unshift({
+          date: new Date().toLocaleString('ar-EG'),
+          user: user,
+          action: actionDesc,
+          type: typeClass,
+          companyCode: code
+      });
+      if (db.logs.length > 2000) db.logs.pop(); // الحفاظ على آخر 2000 حركة
+      saveDB(db);
+    }
+
+    function createDailyBackup(db) {
+        const today = new Date().toLocaleDateString('en-GB'); 
+        const lastBackup = db.backups.length > 0 ? db.backups[db.backups.length - 1] : null;
+        
+        if (!lastBackup || lastBackup.date !== today) {
+            let dbCopy = JSON.parse(JSON.stringify(db));
+            dbCopy.backups = []; // لا نحفظ النسخ داخل النسخة لتوفير المساحة
+            db.backups.push({ date: today, timestamp: new Date().toLocaleString('ar-EG'), data: dbCopy });
+            if (db.backups.length > 30) db.backups.shift(); // الاحتفاظ بـ 30 يوماً فقط
+            saveDB(db);
+        }
+    }
+
+    function renderLogsAndBackups() {
+      let db = getDB();
+      
+      // Master Logs Table
+      const mLogsBody = document.getElementById('master-logs-tbody');
+      if(mLogsBody) {
+          mLogsBody.innerHTML = '';
+          db.logs.forEach(log => {
+              mLogsBody.innerHTML += `<tr>
+                <td style="font-size:0.85rem; color:#64748b;">${log.date}</td>
+                <td style="font-weight:bold;">${log.user}</td>
+                <td class="log-type-${log.type}">${log.type === 'add' ? 'إضافة' : log.type === 'edit' ? 'تعديل' : log.type === 'delete' ? 'حذف' : 'دخول/حركة'}</td>
+                <td>${log.action}</td>
+                <td><span class="badge-serial">${log.companyCode}</span></td>
+              </tr>`;
+          });
+      }
+
+      // HR Logs Table (Filtered by Company)
+      const hLogsBody = document.getElementById('hr-logs-tbody');
+      if(hLogsBody) {
+          hLogsBody.innerHTML = '';
+          const compCode = sessionStorage.getItem('current_company_code');
+          db.logs.filter(l => l.companyCode === compCode).forEach(log => {
+              hLogsBody.innerHTML += `<tr>
+                <td style="font-size:0.85rem; color:#64748b;">${log.date}</td>
+                <td style="font-weight:bold;">${log.user}</td>
+                <td class="log-type-${log.type}">${log.type === 'add' ? 'إضافة' : log.type === 'edit' ? 'تعديل' : log.type === 'delete' ? 'حذف' : 'دخول/حركة'}</td>
+                <td>${log.action}</td>
+              </tr>`;
+          });
+      }
+
+      // Backups Table (Master Only)
+      const mBackupsBody = document.getElementById('master-backups-tbody');
+      if(mBackupsBody) {
+          mBackupsBody.innerHTML = '';
+          db.backups.forEach((b, idx) => {
+              mBackupsBody.innerHTML += `<tr>
+                <td style="font-weight:bold; color:var(--primary-hr);">${b.date}</td>
+                <td style="color:#64748b; font-size:0.9rem;">${b.timestamp}</td>
+                <td><button class="btn btn-warning" onclick="restoreBackup(${idx})" style="padding:4px 10px; font-size:0.85rem;">إرجاع هذه النسخة (Restore)</button></td>
+              </tr>`;
+          });
+      }
+    }
+
+    function restoreBackup(index) {
+        if(confirm('⚠️ تحذير: استرجاع نسخة احتياطية سيمسح جميع البيانات المدخلة بعد هذا التاريخ. هل أنت متأكد من رغبتك بالاسترجاع؟')) {
+            let db = getDB();
+            let backupData = db.backups[index].data;
+            backupData.backups = db.backups; // الحفاظ على سجل النسخ الحالي
+            saveDB(backupData);
+            logSystemAction('استعادة نسخة احتياطية من تاريخ: ' + db.backups[index].date, 'edit', 'Master');
+            alert('تم استعادة النسخة بنجاح. سيتم إعادة تشغيل النظام.');
+            window.location.reload();
+        }
+    }
+
+    // =========================================================
 
     function toggleSidebar() {
       document.querySelectorAll('aside').forEach(el => el.classList.toggle('open'));
@@ -1009,10 +1142,11 @@
         const empTarget = document.getElementById('geo-emp-select');
         const targetName = empTarget.options[empTarget.selectedIndex].text;
         const locName = document.getElementById('geo-name').value;
+        logAction('اعتماد موقع جغرافي: ' + locName, 'add');
         alert(`تم اعتماد الموقع (${locName}) وتخصيصه لـ: ${targetName} بنجاح!`);
     }
 
-    // ================= الدخول الذكي الفائق (خانتين فقط) =================
+    // ================= الدخول الذكي =================
     function handleLogin(event) {
       event.preventDefault();
       const user = document.getElementById('login-user').value.trim();
@@ -1035,14 +1169,16 @@
               acc: masterUser.canViewAccounting,
               isSuper: masterUser.isSuper
           }));
+          logAction('تسجيل دخول المالك/المندوب', 'login', 'Master');
           openMasterPortal(); 
           return;
       }
       
-      // التوافق القديم جداً (Master)
+      // التوافق القديم
       if (user.toLowerCase() === "master" && pass === "1000") {
           sessionStorage.setItem('logged_master_name', "المدير العام (Legacy)");
           sessionStorage.setItem('master_perms', JSON.stringify({ annual: true, trial: true, acc: true, isSuper: true }));
+          logAction('تسجيل دخول المالك الافتراضي', 'login', 'Master');
           openMasterPortal(); return; 
       }
       
@@ -1050,6 +1186,7 @@
       let matchedLicense = lics.find(l => (l.hrUser === user || l.companyCode === user) && l.hrPass === pass && l.status === 'active');
       if(matchedLicense) {
           sessionStorage.setItem('current_company_code', matchedLicense.companyCode);
+          logAction('تسجيل دخول مدير HR', 'login', matchedLicense.companyCode);
           openPortal('hr-portal', matchedLicense);
           return;
       }
@@ -1061,6 +1198,7 @@
         if(empLicense) {
             sessionStorage.setItem('current_company_code', matchedEmp.companyCode);
             sessionStorage.setItem('logged_emp_name', matchedEmp.name);
+            logAction('تسجيل دخول موظف: ' + matchedEmp.name, 'login', matchedEmp.companyCode);
             openPortal('emp-portal', empLicense);
             return;
         }
@@ -1126,7 +1264,6 @@
         document.getElementById('app-body').className = 'hr-mode';
         document.getElementById('active-company-name').innerText = `🏢 ${licenseData.company}`;
         
-        // استعادة إظهار بيانات الترخيص بالكامل هنا
         document.getElementById('display-hr-key').innerText = licenseData.key || '-';
         document.getElementById('display-hr-serial').innerText = licenseData.serial || '-';
         document.getElementById('display-hr-code').innerText = licenseData.companyCode || '-';
@@ -1135,7 +1272,7 @@
         let remaining = parseInt(licenseData.duration) - passedDays;
         document.getElementById('hr-countdown-days').innerText = remaining > 0 ? remaining + " يوم" : "منتهية";
         
-        loadHRData(); loadSettingsData(); 
+        loadHRData(); loadSettingsData(); renderLogsAndBackups();
       } else if (portalId === 'emp-portal') {
         document.getElementById('app-body').className = 'emp-mode';
         document.getElementById('logged-emp-name-display').innerText = sessionStorage.getItem('logged_emp_name') || "الموظف";
@@ -1175,7 +1312,7 @@
           document.getElementById('new-company-code').value = Math.floor(1000 + Math.random() * 9000).toString();
       }
 
-      renderLicensesTable(); calculateAndRenderAccounting(); renderMasterUsersTable();
+      renderLicensesTable(); calculateAndRenderAccounting(); renderMasterUsersTable(); renderLogsAndBackups();
     }
 
     function changeMainPassword(e) {
@@ -1188,6 +1325,7 @@
       if (db.masterUsers[userIndex]) {
           db.masterUsers[userIndex].password = newPass;
           saveDB(db);
+          logSystemAction('تغيير كلمة المرور الرئيسية', 'edit', 'Master');
           alert("تم تغيير كلمة المرور بنجاح. سيتم نقلك لإرسالها عبر الإيميل كنسخة احتياطية.");
           
           let emailBody = `مرحباً،\n\nتم تغيير كلمة المرور الرئيسية بنجاح.\n\nبيانات الدخول الجديدة:\nالمستخدم: ${db.masterUsers[userIndex].username}\nكلمة المرور: ${newPass}\n\nمع التحية.`;
@@ -1221,7 +1359,9 @@
           canViewAccounting: document.getElementById('mu-perm-acc').checked,
           isSuper: false
       });
-      saveDB(db); alert("تم إضافة المندوب للفريق بنجاح!"); e.target.reset(); renderMasterUsersTable();
+      saveDB(db); 
+      logSystemAction('إضافة مستخدم مبيعات: ' + username, 'add', 'Master');
+      alert("تم إضافة المندوب للفريق بنجاح!"); e.target.reset(); renderMasterUsersTable();
     }
 
     function deleteMasterUser(id) {
@@ -1236,7 +1376,9 @@
        
        if(confirm("تأكيد حذف المندوب نهائياً؟")) {
           db.masterUsers = db.masterUsers.filter(x => x.id !== id);
-          saveDB(db); renderMasterUsersTable();
+          saveDB(db); 
+          logSystemAction('حذف مستخدم مبيعات: ' + u.username, 'delete', 'Master');
+          renderMasterUsersTable();
        }
     }
 
@@ -1284,6 +1426,7 @@
         timestamp: Date.now(), date: new Date().toLocaleDateString('ar-EG'), status: 'active'
       };
       db.licenses.push(newLicense); saveDB(db);
+      logSystemAction('توليد ترخيص جديد للشركة: ' + comp, 'add', 'Master');
       alert(`تم التوليد بنجاح!\nرمز الشركة: ${companyCode}\nيوزر: ${hrUser}\nالباسورد: ${hrPass}`); 
       document.getElementById('new-company-name').value = '';
       document.getElementById('new-company-code').value = Math.floor(1000 + Math.random() * 9000).toString();
@@ -1335,6 +1478,7 @@
           }
       }
       saveDB(db);
+      logSystemAction('تعديل بيانات الشركة: ' + newComp, 'edit', 'Master');
       document.getElementById('edit-license-screen').style.display = 'none';
       renderLicensesTable();
       alert("تم تحديث وتعديل بيانات الشركة بنجاح.");
@@ -1342,11 +1486,19 @@
 
     function changeLicenseStatus(key, newStatus) {
       let db = getDB(); if(!db.licenses) return; let idx = db.licenses.findIndex(l => l.key === key);
-      if(idx > -1) { db.licenses[idx].status = newStatus; saveDB(db); renderLicensesTable(); }
+      if(idx > -1) { 
+        db.licenses[idx].status = newStatus; saveDB(db); 
+        logSystemAction('تعديل حالة ترخيص: ' + db.licenses[idx].company, 'edit', 'Master');
+        renderLicensesTable(); 
+      }
     }
 
     function deleteLicense(key) {
-      if(confirm("حذف نهائي؟")) { let db = getDB(); if(!db.licenses) return; db.licenses = db.licenses.filter(l => l.key !== key); saveDB(db); renderLicensesTable(); }
+      if(confirm("حذف نهائي؟")) { 
+        let db = getDB(); if(!db.licenses) return; 
+        logSystemAction('حذف ترخيص شركة', 'delete', 'Master');
+        db.licenses = db.licenses.filter(l => l.key !== key); saveDB(db); renderLicensesTable(); 
+      }
     }
 
     function renderLicensesTable() {
@@ -1366,7 +1518,9 @@
       let db = getDB();
       if(!db.transactions) db.transactions = [];
       db.transactions.push({ id: "VCH-" + Math.floor(Math.random() * 10000), type: document.getElementById('trans-type').value, amount: parseFloat(document.getElementById('trans-amount').value), method: document.getElementById('trans-method').value, desc: document.getElementById('trans-desc').value, date: document.getElementById('trans-date').value });
-      saveDB(db); document.getElementById('trans-amount').value = ''; document.getElementById('trans-desc').value = ''; calculateAndRenderAccounting();
+      saveDB(db); 
+      logSystemAction('إضافة سند مالي للمالك', 'add', 'Master');
+      document.getElementById('trans-amount').value = ''; document.getElementById('trans-desc').value = ''; calculateAndRenderAccounting();
     }
 
     function calculateAndRenderAccounting() {
@@ -1392,9 +1546,16 @@
       let currentCode = sessionStorage.getItem('current_company_code'); let targetKey = type + '_' + currentCode;
       if(!db.settings) db.settings = {};
       if(!db.settings[targetKey]) db.settings[targetKey] = []; db.settings[targetKey].push(val); saveDB(db);
+      logSystemAction('إضافة إعداد: ' + val, 'add');
       document.getElementById(`input-${type}`).value = ''; if(type === 'banks') document.getElementById('input-bank-code').value = ''; loadSettingsData();
     }
-    function removeSetting(type, index) { let db = getDB(); let currentCode = sessionStorage.getItem('current_company_code'); let targetKey = type + '_' + currentCode; if(db.settings && db.settings[targetKey]) { db.settings[targetKey].splice(index, 1); saveDB(db); loadSettingsData(); } }
+    function removeSetting(type, index) { 
+      let db = getDB(); let currentCode = sessionStorage.getItem('current_company_code'); let targetKey = type + '_' + currentCode; 
+      if(db.settings && db.settings[targetKey]) { 
+        logSystemAction('حذف إعداد: ' + db.settings[targetKey][index], 'delete');
+        db.settings[targetKey].splice(index, 1); saveDB(db); loadSettingsData(); 
+      } 
+    }
     function loadSettingsData() {
       let db = getDB(); let currentCode = sessionStorage.getItem('current_company_code');
       if(!db.settings) db.settings = {};
@@ -1469,7 +1630,9 @@
         paymentMethod: document.getElementById('emp-payment-method').value, bank: document.getElementById('emp-bank').value || '', iban: document.getElementById('emp-iban').value || '',
         empSsn: document.getElementById('emp-ssn').value, compSsn: document.getElementById('emp-comp-ssn').value, ssRate: parseFloat(document.getElementById('emp-ss-rate').value) || 7.5
       });
-      saveDB(db); alert('تم حفظ واعتماد الموظف!'); e.target.reset(); document.getElementById('emp-short-id').value = ''; document.getElementById('emp-id').value = ''; generateEmpId(); loadHRData(); 
+      saveDB(db); 
+      logSystemAction('إضافة موظف جديد: ' + empIdVal, 'add');
+      alert('تم حفظ واعتماد الموظف!'); e.target.reset(); document.getElementById('emp-short-id').value = ''; document.getElementById('emp-id').value = ''; generateEmpId(); loadHRData(); 
     }
     
     function loadHRData() {
@@ -1506,12 +1669,14 @@
       document.getElementById('res-gross').innerText = gross.toFixed(2); document.getElementById('res-deduct').innerText = totalDed.toFixed(2); document.getElementById('res-net').innerText = net > 0 ? net.toFixed(2) : "0.00";
     }
 
-    // تصدير البنوك
     function generateBankReport() {
       let db = getDB(); if(!db.employees) return;
       const compEmployees = db.employees.filter(e => e.companyCode === sessionStorage.getItem('current_company_code'));
       const tbody = document.getElementById('bank-report-body'); tbody.innerHTML = '';
       if(compEmployees.length === 0) { tbody.innerHTML = '<tr><td colspan="8" style="text-align:center;">لا يوجد موظفين</td></tr>'; return; }
+      
+      logSystemAction('توليد مسير رواتب', 'info');
+      
       compEmployees.forEach((emp, index) => {
         let net = ((emp.salary || 0) + (emp.allowance || 0)) * (1 - ((emp.ssRate || 7.5)/100) - 0.02);
         let payMethodText = emp.paymentMethod === 'cash' ? 'نقداً' : (emp.paymentMethod === 'check' ? 'شيك' : 'تحويل بنكي');
@@ -1522,6 +1687,9 @@
       let db = getDB(); if(!db.employees) return;
       const compEmployees = db.employees.filter(e => e.companyCode === sessionStorage.getItem('current_company_code'));
       if(compEmployees.length === 0) { alert('لا يوجد بيانات.'); return; }
+      
+      logSystemAction('تصدير مسير رواتب للبنك عبر الإيميل', 'info');
+      
       let emailBody = "السادة البنك المحترمين،\n\nنرفق لكم كشف الرواتب:\n\n";
       compEmployees.forEach((emp, i) => {
         if(emp.paymentMethod === 'bank') { 
@@ -1535,6 +1703,7 @@
       const sel = document.getElementById('report-emp-select'); if(!sel.value) return;
       document.getElementById('rep-name').innerText = "الاسم: " + sel.options[sel.selectedIndex].text.split(' (')[0];
       document.getElementById('rep-id').innerText = "الرقم: " + sel.options[sel.selectedIndex].text.split(' (')[1].replace(')','');
+      logSystemAction('طباعة تقرير سري لموظف', 'info');
       document.getElementById('printable-area').style.display = 'block';
     }
   </script>
