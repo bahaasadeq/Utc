@@ -1,0 +1,1339 @@
+<!DOCTYPE html>
+<html lang="ar" dir="rtl">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+  <title>UTC HR Ecosystem | المنظومة الشاملة لإدارة الشركات</title>
+  <link href="https://fonts.googleapis.com/css2?family=Tajawal:wght@400;500;700;800&display=swap" rel="stylesheet">
+  <style>
+    :root {
+      --primary-hr: #2563eb; --sidebar-hr: #1e3a8a;
+      --primary-master: #d97706; --sidebar-master: #0f172a;
+      --primary-emp: #059669; --sidebar-emp: #064e3b;
+      --accent: #059669; --danger: #dc2626; --bg: #f1f5f9;
+      --card: #ffffff; --text-main: #0f172a; --text-muted: #64748b;
+      --border: #e2e8f0; --radius: 12px;
+    }
+    * { box-sizing: border-box; margin: 0; padding: 0; font-family: 'Tajawal', sans-serif; }
+    
+    /* حل مشكلة الهاتف: استخدام 100dvh ليتوافق مع أبعاد شاشات الآيفون والأندرويد بدقة */
+    body { background-color: var(--bg); color: var(--text-main); height: 100vh; height: 100dvh; overflow: hidden; display: flex; }
+    
+    /* ================= شاشات الدخول ================= */
+    .overlay-screen {
+      position: fixed; top: 0; left: 0; right: 0; bottom: 0;
+      background: linear-gradient(135deg, #0f172a, #1e3a8a);
+      display: flex; justify-content: center; align-items: center; z-index: 1000;
+      overflow-y: auto; padding: 20px;
+    }
+    .auth-card {
+      background: #fff; padding: 40px; border-radius: 20px; box-shadow: 0 20px 25px -5px rgba(0,0,0,0.2);
+      width: 100%; max-width: 400px; text-align: center; margin: auto;
+    }
+    .auth-card h2 { font-size: 2.2rem; color: #0f172a; margin-bottom: 5px; font-weight: 800;}
+    .auth-card p { color: var(--text-muted); margin-bottom: 25px; font-size: 0.95rem; font-weight: 600;}
+    
+    .input-field {
+      width: 100%; padding: 14px 16px; margin-bottom: 16px; border: 1px solid var(--border);
+      border-radius: 8px; font-size: 1rem; outline: none; background: #f8fafc; transition: 0.2s;
+    }
+    .input-field:focus { border-color: var(--primary-hr); background: #fff; box-shadow: 0 0 0 3px rgba(37, 99, 235, 0.1);}
+    .input-field::placeholder { color: #a1a1aa; font-weight: 500; font-size: 0.95rem;}
+    
+    .btn-auth {
+      width: 100%; padding: 14px; background: var(--primary-hr); color: white;
+      border: none; border-radius: 8px; font-size: 1.1rem; font-weight: 700; cursor: pointer; touch-action: manipulation;
+    }
+    .error-msg { color: var(--danger); font-size: 0.9rem; font-weight: 700; margin-top: 15px; display: none; }
+
+    /* ================= الهيكل المشترك ================= */
+    aside { width: 280px; color: white; padding: 24px 16px; display: flex; flex-direction: column; gap: 24px; flex-shrink: 0; transition: 0.3s; overflow-y:auto;}
+    aside .brand { font-size: 1.5rem; font-weight: 800; border-bottom: 1px solid rgba(255,255,255,0.1); padding-bottom: 16px; text-align: center;}
+    .nav-btn { width: 100%; background: none; border: none; color: #cbd5e1; padding: 14px 16px; border-radius: 8px; text-align: right; cursor: pointer; font-size: 0.95rem; font-weight: 600; margin-bottom: 8px;}
+    .nav-btn:hover { background: rgba(255, 255, 255, 0.1); color: #fff; }
+    
+    .master-mode aside { background: var(--sidebar-master); border-left: 1px solid #1e293b;}
+    .master-mode .nav-btn.active { background: var(--primary-master); color: white; }
+    .hr-mode aside { background: var(--sidebar-hr); }
+    .hr-mode .nav-btn.active { background: var(--primary-hr); color: white; }
+    .emp-mode aside { background: var(--sidebar-emp); }
+    .emp-mode .nav-btn.active { background: var(--primary-emp); color: white; }
+
+    /* تم التعديل هنا لضمان ثبات الشريط العلوي مهما تم التمرير */
+    main { flex: 1; display: flex; flex-direction: column; height: 100%; overflow: hidden; width: 100%; position: relative; }
+    header { background: var(--card); border-bottom: 1px solid var(--border); padding: 16px 24px; display: flex; justify-content: space-between; align-items: center; z-index: 50; flex-shrink: 0; }
+    .content-container { flex: 1; overflow-y: auto; padding: 32px; width: 100%; max-width: 1300px; margin: 0 auto; -webkit-overflow-scrolling: touch; }
+    
+    /* ================= خانة البحث الشاملة ================= */
+    .global-search-container { flex: 1; max-width: 500px; margin: 0 20px; position: relative; }
+    .global-search-input { margin: 0; border-radius: 20px; padding: 10px 18px; width: 100%; border: 1px solid var(--border); outline: none; font-family: 'Tajawal', sans-serif; background: #f8fafc; transition: 0.2s;}
+    .global-search-input:focus { border-color: var(--primary-hr); background: #fff; box-shadow: 0 0 0 3px rgba(37, 99, 235, 0.1); }
+    .search-results-dropdown { display: none; position: absolute; top: 110%; right: 0; left: 0; background: #fff; border: 1px solid var(--border); border-radius: 8px; box-shadow: 0 10px 15px -3px rgba(0,0,0,0.1); max-height: 300px; overflow-y: auto; z-index: 1000; text-align: right; }
+    .search-result-item { padding: 12px 15px; border-bottom: 1px solid #f1f5f9; cursor: pointer; transition: 0.2s; }
+    .search-result-item:hover { background: #f8fafc; }
+    .search-result-name { font-weight: bold; color: #0f172a; font-size: 0.95rem; }
+    .search-result-details { font-size: 0.8rem; color: #64748b; margin-top: 4px; }
+
+    /* ================= التوافق مع شاشات الهاتف المحمول الذكية (Mobile Fixes) ================= */
+    .menu-toggle { display: none; background: none; border: none; font-size: 1.8rem; color: var(--text-main); cursor: pointer; margin-left: 15px; }
+    .mobile-overlay { display: none; position: fixed; top: 0; left: 0; right: 0; bottom: 0; background: rgba(0,0,0,0.5); z-index: 998; }
+    .mobile-overlay.active { display: block; }
+
+    @media (max-width: 768px) {
+      .overlay-screen { align-items: flex-start; padding-top: 8vh; }
+      .auth-card { padding: 30px 20px; }
+      
+      aside { position: fixed; right: -300px; height: 100%; box-shadow: -5px 0 15px rgba(0,0,0,0.1); z-index: 999; }
+      aside.open { right: 0; }
+      .menu-toggle { display: block; }
+      
+      header { flex-wrap: wrap; padding: 15px; gap: 10px; }
+      .header-title-container { width: 100%; display: flex; align-items: center; justify-content: space-between; }
+      .global-search-container { order: 3; max-width: 100%; margin: 10px 0 0 0; flex-basis: 100%; }
+      
+      .grid-4, .grid-3, .grid-2 { grid-template-columns: 1fr !important; }
+      .content-container { padding: 15px; }
+      
+      .card-title { flex-direction: column; align-items: flex-start; gap: 10px; }
+      .table-responsive { overflow-x: auto; -webkit-overflow-scrolling: touch; }
+      .acc-summary-box .val, .card h3 { font-size: 1.5rem; }
+    }
+
+    .view-section { display: none; animation: fadeIn 0.3s ease-in-out; }
+    .view-section.active { display: block; }
+    @keyframes fadeIn { from { opacity: 0; transform: translateY(10px); } to { opacity: 1; transform: translateY(0); } }
+    
+    .card { background: var(--card); border: 1px solid var(--border); border-radius: var(--radius); padding: 24px; margin-bottom: 24px; box-shadow: 0 4px 6px -1px rgba(0,0,0,0.05); }
+    .card-title { font-size: 1.1rem; font-weight: 700; margin-bottom: 20px; border-bottom: 1px solid #f1f5f9; padding-bottom: 12px; display: flex; justify-content: space-between; align-items: center;}
+    .grid-4 { display: grid; grid-template-columns: repeat(4, 1fr); gap: 16px; }
+    .grid-3 { display: grid; grid-template-columns: repeat(3, 1fr); gap: 16px; }
+    .grid-2 { display: grid; grid-template-columns: 1fr 1fr; gap: 16px; }
+    .form-group { display: flex; flex-direction: column; gap: 6px; margin-bottom: 15px;}
+    label { font-size: 0.85rem; font-weight: 700; color: #475569; }
+    .req { color: var(--danger); font-weight: bold;}
+    
+    .badge-code { background: #fef3c7; color: #92400e; padding: 6px 12px; border-radius: 6px; font-family: monospace; font-size: 1rem; font-weight: 800; direction: ltr; display: inline-block; letter-spacing: 1px;}
+    .badge-serial { background: #1e293b; color: #38bdf8; padding: 4px 10px; border-radius: 6px; font-family: monospace; font-weight: 800; direction: ltr; display: inline-block;}
+    
+    table { width: 100%; border-collapse: collapse; margin-top: 12px; font-size: 0.95rem; min-width: 600px; }
+    th, td { border: 1px solid var(--border); padding: 14px; text-align: right; }
+    th { background: #f1f5f9; color: #0f172a; font-weight: 800; }
+    .status-badge { padding: 6px 10px; border-radius: 6px; font-size: 0.8rem; font-weight: 800; }
+    
+    .btn { padding: 12px 20px; border-radius: 8px; font-weight: 700; cursor: pointer; border: none; font-size: 0.95rem; color: white; transition: 0.2s; display:inline-flex; align-items:center; justify-content:center; gap:8px;}
+    .btn-master { background: var(--primary-master); }
+    .btn-hr { background: var(--primary-hr); }
+    .btn-emp { background: var(--primary-emp); }
+    .btn-danger { background: var(--danger); padding: 8px 16px; font-size: 0.85rem;}
+    .btn-secondary { background: #e2e8f0; color: #334155; }
+    .btn-warning { background: #f59e0b; color: white; }
+    .btn-dark { background: #334155; color: white; }
+    
+    .alert-box { background: #fffbeb; border: 1px solid #fde68a; padding: 15px; border-radius: 8px; margin-bottom: 20px; color: #92400e; font-size: 0.9rem; font-weight: bold;}
+
+    /* الملخص المحاسبي والرواتب */
+    .acc-summary-box { padding: 20px; border-radius: 12px; text-align: center; border: 1px solid var(--border); background: var(--card); box-shadow: 0 4px 6px -1px rgba(0,0,0,0.05);}
+    .acc-summary-box h3 { font-size: 0.95rem; color: var(--text-muted); margin-bottom: 8px; font-weight: 700;}
+    .acc-summary-box .val { font-size: 2rem; font-weight: 800; }
+    
+    .finance-summary { background: #0f172a; color: white; padding: 24px; border-radius: 12px; display: flex; justify-content: space-between; align-items: center; margin-top: 24px; flex-wrap:wrap; gap:15px;}
+    .finance-item { text-align: center; flex: 1; border-left: 1px solid #334155;}
+    .finance-item:last-child { border-left: none; }
+    .finance-item span { display: block; font-size: 0.9rem; color: #94a3b8; margin-bottom: 8px; }
+    .finance-item strong { font-size: 1.8rem; color: #fff; font-variant-numeric: tabular-nums;}
+    .finance-item.net-salary strong { color: #10b981; font-size: 2.2rem; }
+    .finance-item.deduction strong { color: #ef4444; }
+
+    .type-in { color: #166534; background: #dcfce7; padding: 4px 8px; border-radius: 4px; font-weight:bold; font-size:0.8rem;}
+    .type-out { color: #991b1b; background: #fee2e2; padding: 4px 8px; border-radius: 4px; font-weight:bold; font-size:0.8rem;}
+
+    /* طباعة التقارير */
+    @media print {
+      body * { visibility: hidden; } 
+      #printable-area, #printable-area * { visibility: visible; } 
+      #printable-area { position: absolute; left: 0; top: 0; width: 100%; border: none; padding: 0; }
+      th { background-color: #f1f5f9 !important; -webkit-print-color-adjust: exact; }
+    }
+    
+    /* بصمة الموظف */
+    .punch-circle { width: 180px; height: 180px; border-radius: 50%; background: linear-gradient(135deg, #10b981, #059669); color: white; display: flex; flex-direction: column; justify-content: center; align-items: center; margin: 20px auto; cursor: pointer; box-shadow: 0 10px 20px -5px rgba(16, 185, 129, 0.4); border: 4px solid #d1fae5; transition: transform 0.2s;}
+    .punch-circle:active { transform: scale(0.95); }
+    .clock-display { font-size: 2rem; font-weight: 800; margin-bottom: 5px; font-variant-numeric: tabular-nums;}
+  </style>
+</head>
+<body id="app-body">
+
+  <!-- ================= 1. شاشة تسجيل الدخول الموحدة ================= -->
+  <div id="login-screen" class="overlay-screen">
+    <div class="auth-card">
+      <h2>UTC <span>Gate</span></h2>
+      <p>بوابة الدخول الموحدة للمنظومة</p>
+      <form onsubmit="handleLogin(event)">
+        <!-- نصوص باهتة (Placeholder) -->
+        <input type="text" id="login-user" class="input-field" placeholder="User Name / اسم المستخدم" autocomplete="off" required>
+        <input type="password" id="login-pass" class="input-field" placeholder="Password / كلمة المرور" required>
+        <button type="submit" class="btn-auth">دخول (Login)</button>
+        <div id="login-error" class="error-msg">البيانات غير صحيحة!</div>
+      </form>
+    </div>
+  </div>
+
+  <!-- ================= 2. شاشة تفعيل ترخيص الـ HR ================= -->
+  <div id="activation-screen" class="overlay-screen" style="display: none;">
+    <div class="auth-card">
+      <h2>تفعيل <span>النظام</span></h2>
+      <p>أدخل مفتاح الترخيص المزود من الشركة المالكة.</p>
+      <form onsubmit="handleActivation(event)">
+        <input type="text" id="license-input" class="input-field" placeholder="UTC-365D-XXXX" style="text-align: center; direction: ltr; font-family: monospace; font-weight: bold; font-size: 1.1rem;" required>
+        <button type="submit" class="btn-auth" style="background: var(--accent);">تفعيل النسخة</button>
+        <div id="activation-error" class="error-msg">الترخيص غير صحيح أو منتهي!</div>
+        <button type="button" onclick="logout()" style="background: none; border: none; color: var(--text-muted); margin-top: 15px; cursor: pointer; font-weight: bold;">إلغاء</button>
+      </form>
+    </div>
+  </div>
+
+  <!-- طبقة التظليل للجوال -->
+  <div id="mobile-overlay" class="mobile-overlay" onclick="toggleSidebar()"></div>
+
+  <!-- ================= 3. بوابة المالك (Master Portal) ================= -->
+  <div id="master-portal" style="display: none; width: 100%;">
+    <aside>
+      <div class="brand">UTC <span style="color: var(--primary-master);">Master</span></div>
+      <button class="nav-btn active" onclick="switchTab('master-licenses', 'master', this)">🏢 إدارة الشركات والرخص</button>
+      <button class="nav-btn" onclick="switchTab('master-accounting', 'master', this)">💰 النظام المحاسبي (P&L)</button>
+    </aside>
+    <main>
+      <header>
+        <div class="header-title-container">
+          <div style="display: flex; align-items: center;">
+            <button class="menu-toggle" onclick="toggleSidebar()">☰</button>
+            <div style="font-weight: 800; font-size: 1.2rem; color: var(--primary-master);">لوحة تحكم مالك النظام</div>
+          </div>
+          <button class="btn btn-danger" onclick="logout()">خروج</button>
+        </div>
+        
+        <!-- خانة البحث الشاملة -->
+        <div class="global-search-container">
+          <input type="text" class="global-search-input" placeholder="🔍 بحث شامل عن موظف..." onkeyup="performGlobalSearch(this)">
+          <div class="search-results-dropdown"></div>
+        </div>
+      </header>
+      <div class="content-container">
+        
+        <!-- الرخص -->
+        <section id="master-licenses" class="view-section active">
+          <div class="card" style="border-top: 4px solid var(--primary-master);">
+            <div class="card-title">إصدار ترخيص (SaaS) جديد</div>
+            <div class="grid-2">
+              <div class="form-group"><label>اسم الشركة العميل</label><input type="text" id="new-company-name" class="input-field"></div>
+              <div class="form-group">
+                <label>مدة الترخيص</label>
+                <select id="new-license-duration" class="input-field">
+                  <option value="30">تجريبي 30 يوماً</option>
+                  <option value="90">تجريبي 90 يوماً</option>
+                  <option value="365">اشتراك سنوي</option>
+                </select>
+              </div>
+            </div>
+            <button class="btn btn-master" onclick="generateAndSaveLicense()">➕ توليد وحفظ الترخيص</button>
+          </div>
+          <div class="card">
+            <div class="card-title">سجل التراخيص والشركات</div>
+            <div class="table-responsive">
+              <table id="licenses-table">
+                <thead><tr><th>النسخة</th><th>الشركة</th><th>الرخصة</th><th>المدة</th><th>الحالة</th><th>إجراءات</th></tr></thead>
+                <tbody id="licenses-table-body"></tbody>
+              </table>
+            </div>
+          </div>
+        </section>
+
+        <!-- المحاسبة -->
+        <section id="master-accounting" class="view-section">
+          <div class="card">
+            <div class="card-title">النظام المحاسبي لإيراداتك (P&L & Vouchers)</div>
+            
+            <div class="grid-4" style="margin-bottom: 24px;">
+              <div class="acc-summary-box" style="border-top: 4px solid #166534;">
+                <h3>إجمالي المقبوضات</h3>
+                <div class="val" id="acc-total-in" style="color: #166534;">0.00</div>
+              </div>
+              <div class="acc-summary-box" style="border-top: 4px solid #991b1b;">
+                <h3>إجمالي المصاريف</h3>
+                <div class="val" id="acc-total-out" style="color: #991b1b;">0.00</div>
+              </div>
+              <div class="acc-summary-box" style="border-top: 4px solid var(--primary-master);">
+                <h3>الذمم (غير محصلة)</h3>
+                <div class="val" id="acc-receivables" style="color: var(--primary-master);">0.00</div>
+              </div>
+              <div class="acc-summary-box" style="background: #0f172a; color: white;">
+                <h3 style="color: #cbd5e1;">الرصيد الصافي الفعلي</h3>
+                <div class="val" id="acc-net-balance" style="color: #38bdf8;">0.00</div>
+              </div>
+            </div>
+            
+            <div class="grid-2" style="margin-bottom: 24px;">
+              <div class="form-group" style="background:#fffbeb; padding:15px; border-radius:8px; border:1px solid #fde68a;">
+                <label style="color:#92400e;">نسبة ضريبة الدخل والشركات المفروضة عليك (%)</label>
+                <input type="number" step="0.5" id="master-tax-rate" class="input-field" value="15" oninput="calculateAndRenderAccounting()" style="margin:0; border-color:var(--primary-master);">
+              </div>
+              <div class="acc-summary-box" style="background: var(--sidebar-master); color: white; padding:15px;">
+                <h3 style="color: #cbd5e1; margin-bottom:5px;">صافي الأرباح (بعد الضريبة)</h3>
+                <div class="val" id="acc-final-profit" style="color: #10b981; font-size:2.5rem;">0.00</div>
+              </div>
+            </div>
+
+            <h4 style="margin: 20px 0 10px; color: var(--primary-master); border-bottom: 1px solid #e2e8f0; padding-bottom: 8px;">إصدار سند مالي جديد</h4>
+            <div class="grid-4" style="margin-bottom: 10px;">
+              <select id="trans-type" class="input-field" style="margin:0;">
+                <option value="in">سند قبض (إيراد)</option>
+                <option value="out">سند صرف (مصروف)</option>
+              </select>
+              <select id="trans-method" class="input-field" style="margin:0;">
+                <option value="cash">نقدي (Cash)</option>
+                <option value="check">شيكات (Checks)</option>
+                <option value="credit">ذمم (آجل)</option>
+              </select>
+              <input type="number" id="trans-amount" class="input-field" style="margin:0;" placeholder="المبلغ (د.أ)">
+              <input type="date" id="trans-date" class="input-field" style="margin:0;">
+            </div>
+            <div style="display:flex; gap:10px; margin-bottom:20px; flex-wrap:wrap;">
+              <input type="text" id="trans-desc" class="input-field" style="margin:0; flex:1; min-width:200px;" placeholder="البيان (عميل/مورد)">
+              <button class="btn btn-master" onclick="addTransaction()">حفظ السند</button>
+            </div>
+
+            <div class="table-responsive">
+              <table>
+                <thead><tr><th>رقم السند</th><th>التاريخ</th><th>النوع</th><th>البيان</th><th>طريقة الدفع</th><th>المبلغ</th></tr></thead>
+                <tbody id="transactions-table-body"></tbody>
+              </table>
+            </div>
+          </div>
+        </section>
+      </div>
+    </main>
+  </div>
+
+  <!-- ================= 4. بوابة إدارة الموارد البشرية (HR Admin) الشاملة ================= -->
+  <div id="hr-portal" style="display: none; width: 100%;">
+    <aside>
+      <div class="brand">UTC <span style="color: #60a5fa;">HR Admin</span></div>
+      <button class="nav-btn active" onclick="switchTab('hr-dashboard', 'hr', this)">📊 النظرة العامة</button>
+      <button class="nav-btn" onclick="switchTab('hr-settings', 'hr', this)">⚙️ إعدادات الشركة والأدلة</button>
+      <button class="nav-btn" onclick="switchTab('hr-employee', 'hr', this)">👤 ملف الموظف الشامل</button>
+      <button class="nav-btn" onclick="switchTab('hr-attendance', 'hr', this)">📍 الحضور والبصمة</button>
+      <button class="nav-btn" onclick="switchTab('hr-leaves', 'hr', this)">📅 الإجازات والموافقات</button>
+      <button class="nav-btn" onclick="switchTab('hr-payroll', 'hr', this)">💳 الرواتب وتصدير البنوك</button>
+      <button class="nav-btn" onclick="switchTab('hr-reports', 'hr', this)">🖨️ التقارير السرية</button>
+    </aside>
+    <main>
+      <header>
+        <div class="header-title-container">
+          <div style="display: flex; align-items: center;">
+            <button class="menu-toggle" onclick="toggleSidebar()">☰</button>
+            <div style="font-weight: 800; font-size: 1.1rem; color: var(--sidebar-hr); white-space: nowrap;">إدارة الموارد البشرية</div>
+          </div>
+          <div style="display: flex; gap: 15px; align-items: center; white-space: nowrap;">
+            <span id="active-company-name" style="font-weight: bold; color: var(--sidebar-hr); display:none;"></span>
+            <button class="btn btn-danger" onclick="logout()">خروج</button>
+          </div>
+        </div>
+
+        <!-- خانة البحث الشاملة -->
+        <div class="global-search-container">
+          <input type="text" class="global-search-input" placeholder="🔍 بحث عن موظف (الاسم، الرقم الوظيفي، الرقم الوطني)..." onkeyup="performGlobalSearch(this)">
+          <div class="search-results-dropdown"></div>
+        </div>
+      </header>
+      <div class="content-container">
+        
+        <!-- Dashboard -->
+        <section id="hr-dashboard" class="view-section active">
+          <div class="card" style="border-top: 4px solid var(--primary-hr);">
+            <div class="card-title" style="color: var(--sidebar-hr);">حالة النظام وصلاحية الترخيص</div>
+            <div style="display: flex; justify-content: space-between; align-items: center; flex-wrap:wrap; gap:15px;">
+              <div>الرخصة: <span id="display-hr-key" class="badge-code"></span><br>النسخة: <span id="display-hr-serial" class="badge-serial"></span></div>
+              <div style="text-align: left;">
+                <div style="font-size: 0.8rem; color: var(--text-muted); font-weight: bold;">الوقت المتبقي للنسخة</div>
+                <div id="hr-countdown-days" style="font-size: 2.5rem; font-weight: 800; color: var(--accent); line-height: 1;"></div>
+              </div>
+            </div>
+          </div>
+          <div class="grid-2">
+            <div class="card" style="text-align: center;"><h3 style="color: var(--text-muted); font-size: 1rem;">إجمالي الموظفين المسجلين</h3><div id="stat-total-emp" style="font-size: 2.5rem; font-weight: 800; color: var(--primary-hr);">0</div></div>
+            <div class="card" style="text-align: center;"><h3 style="color: var(--text-muted); font-size: 1rem;">الرواتب التقديرية (د.أ)</h3><div id="stat-total-salary" style="font-size: 2.5rem; font-weight: 800; color: var(--accent);">0</div></div>
+          </div>
+        </section>
+
+        <!-- الإعدادات (الأقسام + البنوك المطورة) -->
+        <section id="hr-settings" class="view-section">
+          <div class="alert-box">⚙️ قم بتعريف الأقسام، المسميات الوظيفية، ودليل البنوك الخاص بشركتك لاستخدامها في ملف الموظف.</div>
+          <div class="grid-2">
+            <div class="card" style="margin-bottom: 0;">
+              <h4 style="margin-bottom: 15px; color: var(--sidebar-hr);">الأقسام الرئيسية</h4>
+              <div style="display: flex; gap: 5px; margin-bottom: 15px;"><input type="text" id="input-mainDepts" class="input-field" style="margin:0;"><button class="btn btn-hr" onclick="addSetting('mainDepts')">إضافة</button></div>
+              <div id="list-mainDepts" style="min-height: 80px;"></div>
+            </div>
+            <div class="card" style="margin-bottom: 0;">
+              <h4 style="margin-bottom: 15px; color: var(--sidebar-hr);">الأقسام الفرعية</h4>
+              <div style="display: flex; gap: 5px; margin-bottom: 15px;"><input type="text" id="input-subDepts" class="input-field" style="margin:0;"><button class="btn btn-hr" onclick="addSetting('subDepts')">إضافة</button></div>
+              <div id="list-subDepts" style="min-height: 80px;"></div>
+            </div>
+            <div class="card" style="margin-bottom: 0;">
+              <h4 style="margin-bottom: 15px; color: var(--sidebar-hr);">المسميات الوظيفية</h4>
+              <div style="display: flex; gap: 5px; margin-bottom: 15px;"><input type="text" id="input-jobTitles" class="input-field" style="margin:0;"><button class="btn btn-hr" onclick="addSetting('jobTitles')">إضافة</button></div>
+              <div id="list-jobTitles" style="min-height: 80px;"></div>
+            </div>
+            
+            <!-- دليل البنوك والرموز المطور -->
+            <div class="card" style="margin-bottom: 0;">
+              <h4 style="margin-bottom: 15px; color: var(--sidebar-hr);">دليل البنوك والرموز</h4>
+              <div style="display: flex; gap: 5px; margin-bottom: 15px;">
+                <input type="text" id="input-banks" class="input-field" style="margin:0;" placeholder="اسم البنك (مثال: الإسلامي)">
+                <input type="text" id="input-bank-code" class="input-field" style="margin:0; width:80px;" placeholder="رمز (JIB)">
+                <button class="btn btn-hr" onclick="addSetting('banks')">إضافة</button>
+              </div>
+              <div id="list-banks" style="min-height: 80px;"></div>
+            </div>
+          </div>
+        </section>
+
+        <!-- ملف الموظف الشامل -->
+        <section id="hr-employee" class="view-section">
+          <div class="card">
+            <div class="card-title">إضافة موظف جديد شامل (قاعدة البيانات)</div>
+            <div class="alert-box" style="background:#eff6ff; border-color:#bfdbfe; color:#1e40af;">
+              💡 <strong>تنبيه:</strong> الحقول التي بجانبها نجمة حمراء (<span class="req">*</span>) إجبارية. 
+              <br>🔑 <strong>تعديل الرقم الوظيفي والدخول السريع:</strong> يمكنك التعديل يدوياً، وسيرفض النظام أي رقم سريع مكرر. يتم تصفير العداد التسلسلي وبدء العد مع إضافة الموظفين.
+            </div>
+            
+            <form id="employee-form" onsubmit="saveNewEmployee(event)">
+              <!-- القسم 1: الهيكلة والدخول الذكي -->
+              <h4 style="color: var(--sidebar-hr); border-bottom: 1px solid var(--border); padding-bottom: 5px; margin-bottom: 15px;">1. الهيكل الإداري وبيانات الدخول</h4>
+              <div class="grid-4">
+                <div class="form-group"><label>القسم الرئيسي <span class="req">*</span></label><select id="emp-main-dept" class="input-field" onchange="generateEmpId()" required></select></div>
+                <div class="form-group"><label>القسم الفرعي <span class="req">*</span></label><select id="emp-sub-dept" class="input-field" onchange="generateEmpId()" required></select></div>
+                <div class="form-group"><label>المسمى الوظيفي <span class="req">*</span></label><select id="emp-job-title" class="input-field" required></select></div>
+                
+                <!-- الرقم الوظيفي قابل للتعديل -->
+                <div class="form-group"><label>الرقم الوظيفي <span class="req">*</span></label><input type="text" id="emp-id" class="input-field" style="font-weight:bold; color:var(--primary-hr);" required></div>
+              </div>
+              <div class="grid-4">
+                <!-- رقم الدخول السريع قابل للتعديل يدوياً -->
+                <div class="form-group"><label>رقم الدخول السريع (للموظف) <span class="req">*</span></label><input type="text" id="emp-short-id" class="input-field" title="رقم مختصر لدخول الموظف من هاتفه (يمكن تعديله يدوياً)" style="font-weight:bold; color:var(--primary-emp);" required></div>
+                <div class="form-group"><label>كلمة مرور بوابة الموظف <span class="req">*</span></label><input type="text" id="emp-pass" class="input-field" value="123456" required></div>
+              </div>
+
+              <!-- القسم 2: الأسماء -->
+              <h4 style="color: var(--sidebar-hr); border-bottom: 1px solid var(--border); padding-bottom: 5px; margin-bottom: 15px;">2. الأسماء الرسمية</h4>
+              <div class="grid-3">
+                <div class="form-group"><label>الاسم الأول (عربي) <span class="req">*</span></label><input type="text" id="emp-name-ar1" class="input-field" required></div>
+                <div class="form-group"><label>اسم الأب (عربي)</label><input type="text" id="emp-name-ar2" class="input-field"></div>
+                <div class="form-group"><label>العائلة (عربي) <span class="req">*</span></label><input type="text" id="emp-name-ar3" class="input-field" required></div>
+              </div>
+              <div class="grid-3">
+                <div class="form-group"><label>First Name (EN)</label><input type="text" id="emp-name-en1" class="input-field"></div>
+                <div class="form-group"><label>Middle Name (EN)</label><input type="text" id="emp-name-en2" class="input-field"></div>
+                <div class="form-group"><label>Last Name (EN)</label><input type="text" id="emp-name-en3" class="input-field"></div>
+              </div>
+
+              <!-- القسم 3: البيانات الشخصية -->
+              <h4 style="color: var(--sidebar-hr); border-bottom: 1px solid var(--border); padding-bottom: 5px; margin-bottom: 15px;">3. البيانات الشخصية والاتصال</h4>
+              <div class="grid-4">
+                <div class="form-group"><label>الرقم الوطني / الإقامة <span class="req">*</span></label><input type="text" id="emp-nid" class="input-field" required></div>
+                <div class="form-group">
+                  <label>الجنسية <span class="req">*</span></label>
+                  <select id="emp-nationality" class="input-field" required onchange="toggleNationalityOther()">
+                    <option value="jo">الأردن</option><option value="ps">فلسطين</option><option value="eg">مصر</option><option value="sy">سوريا</option><option value="sa">السعودية</option><option value="other">أخرى (تحديد يدوي)</option>
+                  </select>
+                  <input type="text" id="emp-nationality-other" class="input-field" placeholder="أدخل الجنسية هنا..." style="display:none; margin-top: 8px;">
+                </div>
+                <div class="form-group"><label>الجنس <span class="req">*</span></label><select id="emp-gender" class="input-field"><option value="male">ذكر</option><option value="female">أنثى (تفعيل الأمومة)</option></select></div>
+                <div class="form-group"><label>الحالة الاجتماعية</label><select id="emp-status" class="input-field"><option>أعزب</option><option>متزوج</option></select></div>
+              </div>
+              
+              <div class="grid-4">
+                <div class="form-group"><label>تاريخ الميلاد <span class="req">*</span></label><input type="date" id="emp-dob" class="input-field" onchange="calculateAge()" required></div>
+                <div class="form-group"><label>العمر (آلي)</label><input type="text" id="age-display" class="input-field" readonly placeholder="يُحسب تلقائياً"></div>
+                <div class="form-group"><label>مكان السكن الفعلي <span class="req">*</span></label><input type="text" id="emp-residence" class="input-field" required></div>
+                <div class="form-group"><label>هاتف شخصي <span class="req">*</span></label><input type="text" id="emp-phone" class="input-field" required></div>
+              </div>
+
+              <div class="grid-2">
+                <div class="form-group"><label>إيميل شخصي</label><input type="email" id="emp-email" class="input-field"></div>
+                <div class="form-group"><label>هاتف الشركة (إن وجد)</label><input type="text" id="emp-workphone" class="input-field"></div>
+              </div>
+
+              <!-- القسم 4: الطوارئ -->
+              <h4 style="color: var(--danger); border-bottom: 1px solid var(--border); padding-bottom: 5px; margin-bottom: 15px;">4. الاتصال في حالات الطوارئ</h4>
+              <div class="grid-3">
+                <div class="form-group"><label>اسم المعرف (ثلاثي) <span class="req">*</span></label><input type="text" id="emp-emg-name" class="input-field" required></div>
+                <div class="form-group"><label>هاتف طوارئ 1 <span class="req">*</span></label><input type="text" id="emp-emg-phone1" class="input-field" required></div>
+                <div class="form-group"><label>هاتف طوارئ 2</label><input type="text" id="emp-emg-phone2" class="input-field"></div>
+              </div>
+
+              <!-- القسم 5: المالية والبنك والمرفقات -->
+              <h4 style="color: var(--accent); border-bottom: 1px solid var(--border); padding-bottom: 5px; margin-bottom: 15px;">5. المعطيات المالية، البنك، الضمان، وتوثيق العقود</h4>
+              
+              <div class="grid-4">
+                <div class="form-group"><label>الراتب الأساسي <span class="req">*</span></label><input type="number" id="emp-salary" class="input-field" required></div>
+                <div class="form-group"><label>بدلات إضافية</label><input type="number" id="emp-allowance" class="input-field" value="0"></div>
+                <div class="form-group"><label>رقم منشأة الضمان <span class="req">*</span></label><input type="text" id="emp-comp-ssn" class="input-field" required placeholder="رقم الشركة"></div>
+                <div class="form-group"><label>رقم ضمان الموظف <span class="req">*</span></label><input type="text" id="emp-ssn" class="input-field" required placeholder="رقم اشتراك الموظف"></div>
+              </div>
+
+              <div class="grid-4">
+                <div class="form-group"><label>نسبة خصم الضمان (%) <span class="req">*</span></label><input type="number" step="0.01" id="emp-ss-rate" class="input-field" value="7.5" required></div>
+                
+                <div class="form-group">
+                  <label>طريقة تسليم الراتب <span class="req">*</span></label>
+                  <select id="emp-payment-method" class="input-field" required onchange="toggleBankDetails()">
+                    <option value="" disabled selected>-- طريقة الدفع --</option>
+                    <option value="bank">تحويل بنكي</option>
+                    <option value="cash">نقداً (Cash)</option>
+                    <option value="check">شيك</option>
+                  </select>
+                </div>
+                
+                <div class="form-group"><label>البنك المعتمد للموظف</label><select id="emp-bank" class="input-field" disabled></select></div>
+                <div class="form-group"><label>رقم الآيبان (IBAN)</label><input type="text" id="emp-iban" class="input-field" disabled placeholder="JO00..."></div>
+              </div>
+              
+              <div class="grid-3">
+                <div class="form-group"><label>تاريخ بداية العقد <span class="req">*</span></label><input type="date" id="emp-contract-start" class="input-field" required></div>
+                <div class="form-group"><label>تاريخ نهاية العقد</label><input type="date" id="emp-contract-end" class="input-field"></div>
+                <div class="form-group"><label>نسخة عقد العمل (PDF) <span class="req">*</span></label><input type="file" id="emp-contract-file" class="input-field" accept=".pdf" required></div>
+              </div>
+
+              <div class="grid-3">
+                <div class="form-group"><label>صورة الهوية / الجواز <span class="req">*</span></label><input type="file" class="input-field" required></div>
+                <div class="form-group"><label>شهادة عدم المحكومية <span class="req">*</span></label><input type="file" class="input-field" required></div>
+                <div class="form-group"><label>صور وملفات العهد (متعدد)</label><input type="file" id="emp-assets-files" class="input-field" multiple accept="image/*,.pdf"></div>
+              </div>
+
+              <button type="submit" class="btn btn-hr" style="width: 100%; padding: 16px; font-size: 1.1rem; margin-top: 10px;">💾 حفظ وتوثيق ملف الموظف في قاعدة البيانات</button>
+            </form>
+          </div>
+
+          <div class="card">
+            <div class="card-title">قائمة الموظفين المسجلين حالياً</div>
+            <div class="table-responsive">
+              <table id="employees-table">
+                <thead><tr><th>الرقم / الدخول السريع</th><th>الاسم الكامل</th><th>طريقة التسليم</th><th>البنك المعتمد</th><th>الآيبان IBAN</th><th>الراتب الأساسي</th></tr></thead>
+                <tbody id="employees-table-body"></tbody>
+              </table>
+            </div>
+          </div>
+        </section>
+
+        <!-- الحضور وتخصيص الموقع -->
+        <section id="hr-attendance" class="view-section">
+          <div class="card">
+            <div class="card-title">إعدادات النطاق الجغرافي للمقر (Geofencing) وتخصيص الموظفين</div>
+            <div class="grid-4" style="margin-bottom:15px;">
+              <div class="form-group">
+                <label>تخصيص لموظف معين (أو الكل)</label>
+                <select id="geo-emp-select" class="input-field" style="margin:0;">
+                  <option value="all">جميع الموظفين (عام)</option>
+                </select>
+              </div>
+              <div class="form-group"><label>اسم الموقع (تسمية حرة)</label><input type="text" id="geo-name" class="input-field" value="المقر الرئيسي" style="margin:0;"></div>
+              <div class="form-group"><label>خط العرض (Lat)</label><input type="text" id="geo-lat" class="input-field" value="31.9539" style="margin:0;"></div>
+              <div class="form-group"><label>خط الطول (Lng)</label><input type="text" id="geo-lng" class="input-field" value="35.9106" style="margin:0;"></div>
+            </div>
+            <div style="display: flex; gap: 10px; flex-wrap:wrap;">
+              <button class="btn btn-secondary" onclick="alert('تم جلب إحداثيات مقر العمل بنجاح')">جلب إحداثيات موقعي (GPS)</button>
+              <button type="button" class="btn btn-hr" onclick="saveGeoLocation()">تثبيت واعتماد الموقع</button>
+            </div>
+          </div>
+          <div class="card">
+            <div class="card-title">سجل الحضور والبصمة للموظفين</div>
+            <div class="table-responsive">
+              <table>
+                <thead><tr><th>الرقم</th><th>الموظف</th><th>التاريخ</th><th>دخول</th><th>خروج</th></tr></thead>
+                <tbody id="attendance-table-body">
+                  <tr><td colspan="5" style="text-align:center;">لا توجد بصمات مسجلة اليوم</td></tr>
+                </tbody>
+              </table>
+            </div>
+          </div>
+        </section>
+
+        <!-- الإجازات -->
+        <section id="hr-leaves" class="view-section">
+          <div class="card">
+            <div class="card-title">اعتماد طلبات الإجازات المعلقة من بوابة الموظف</div>
+            <div class="table-responsive">
+              <table>
+                <thead><tr><th>الموظف</th><th>نوع الطلب</th><th>المدة</th><th>الإجراء</th></tr></thead>
+                <tbody id="leaves-table-body">
+                  <tr><td colspan="4" style="text-align:center;">لا توجد طلبات معلقة</td></tr>
+                </tbody>
+              </table>
+            </div>
+          </div>
+        </section>
+
+        <!-- محرك الرواتب الشامل + التصدير للبنوك -->
+        <section id="hr-payroll" class="view-section">
+          
+          <div class="card">
+            <div class="card-title">محرك حساب الرواتب والخصومات الذكية (Smart Payroll)</div>
+            <div class="grid-3" style="margin-bottom: 10px;">
+              <div class="form-group">
+                <label>اختر الموظف لاحتساب راتبه</label>
+                <select id="payroll-emp-select" class="input-field" onchange="loadEmpPayrollData()"></select>
+              </div>
+            </div>
+            
+            <!-- الدخل -->
+            <h4 style="margin: 15px 0 10px; color: var(--sidebar-hr); border-bottom: 1px solid #e2e8f0; padding-bottom: 5px;">1. الدخل الإجمالي</h4>
+            <div class="grid-3">
+              <div class="form-group"><label>الراتب الأساسي</label><input type="number" id="pay-basic" class="input-field" oninput="calcPay()"></div>
+              <div class="form-group"><label>بدلات</label><input type="number" id="pay-allowance" class="input-field" oninput="calcPay()"></div>
+              <div class="form-group"><label>إجمالي الدخل الخاضع</label><input type="text" id="pay-gross" class="input-field" readonly></div>
+            </div>
+            
+            <!-- الضمان والضريبة -->
+            <h4 style="margin: 15px 0 10px; color: var(--sidebar-hr); border-bottom: 1px solid #e2e8f0; padding-bottom: 5px;">2. الضمان الاجتماعي والضريبة</h4>
+            <div class="grid-4">
+              <div class="form-group"><label>خصم ضمان الموظف %</label><input type="number" step="0.01" id="pay-ss-rate" class="input-field" value="7.5" oninput="calcPay()"></div>
+              <div class="form-group"><label>قيمة خصم الموظف</label><input type="text" id="pay-ss-emp-amt" class="input-field" readonly style="color:var(--danger);"></div>
+              <div class="form-group"><label>ضريبة الدخل %</label><input type="number" step="0.01" id="pay-tax-rate" class="input-field" value="2.0" oninput="calcPay()"></div>
+              <div class="form-group"><label>قيمة الضريبة</label><input type="text" id="pay-tax-amt" class="input-field" readonly style="color:var(--danger);"></div>
+            </div>
+            
+            <!-- مساهمة الشركة -->
+            <div class="grid-2" style="background: #f8fafc; padding: 10px; border-radius: 8px; margin-bottom: 15px;">
+              <div class="form-group"><label>نسبة ضمان الشركة (مساهمة لا تُخصم من الموظف) %</label><input type="number" step="0.01" id="pay-comp-ss-rate" class="input-field" value="14.25" oninput="calcPay()"></div>
+              <div class="form-group"><label>تكلفة ضمان الشركة الكلية</label><input type="text" id="pay-comp-ss-amt" class="input-field" readonly style="color:var(--warning);"></div>
+            </div>
+
+            <!-- التأخيرات -->
+            <h4 style="margin: 15px 0 10px; color: var(--danger); border-bottom: 1px solid #e2e8f0; padding-bottom: 5px;">3. التأخيرات والخصومات الإدارية</h4>
+            <div style="background: #fef2f2; padding: 10px; border-radius: 8px; margin-bottom: 15px; color: #991b1b; font-weight:bold;">محرك التأخيرات: يُعادل التأخير بالأيام ويُخصم من الإجازات أولاً، والمتبقي يُخصم مالياً.</div>
+            <div class="grid-4">
+              <div class="form-group"><label>ساعات التأخير (هذا الشهر)</label><input type="number" id="pay-delay" class="input-field" value="0" oninput="calcPay()"></div>
+              <div class="form-group"><label>رصيد إجازات الموظف (أيام)</label><input type="number" step="0.5" id="pay-leave-bal" class="input-field" value="14" oninput="calcPay()"></div>
+              <div class="form-group"><label>ما خُصم من الإجازات (أيام)</label><input type="text" id="pay-leave-deduct" class="input-field" readonly style="color:var(--sidebar-hr);"></div>
+              <div class="form-group"><label>خصم مالي لتجاوز الإجازات</label><input type="text" id="pay-delay-amt" class="input-field" readonly style="color:var(--danger);"></div>
+            </div>
+
+            <div class="grid-2">
+              <div class="form-group"><label>إجراء تأديبي إضافي (أيام خصم)</label><input type="number" id="pay-disc" class="input-field" value="0" oninput="calcPay()"></div>
+              <div class="form-group"><label>سلف مقتطعة هذا الشهر</label><input type="number" id="pay-advance" class="input-field" value="0" oninput="calcPay()"></div>
+            </div>
+
+            <!-- الملخص النهائي -->
+            <div class="finance-summary">
+              <div class="finance-item"><span>إجمالي الدخل</span><strong id="res-gross">0.00</strong></div>
+              <div class="finance-item deduction"><span>إجمالي الخصومات</span><strong id="res-deduct">0.00</strong></div>
+              <div class="finance-item net-salary"><span>صافي الراتب المستحق (Net)</span><strong id="res-net">0.00</strong></div>
+            </div>
+          </div>
+
+          <!-- البطاقة المحدثة: تصدير الرواتب للبنوك أو نقداً -->
+          <div class="card" style="border-top: 4px solid var(--accent);">
+            <div class="card-title">تصدير مسير الرواتب (للبنك / للتوقيع النقدي)</div>
+            <p style="color:var(--text-muted); font-size:0.9rem; margin-bottom:15px;">يُظهر الجدول تفاصيل التحويل. في حال كان الراتب "نقداً" يظهر مكان مخصص لتوقيع الموظف بدلاً من البنك.</p>
+            
+            <div class="table-responsive">
+              <table id="bank-report-table">
+                <thead><tr><th>#</th><th>اسم الموظف</th><th>الرقم الوظيفي</th><th>طريقة التسليم</th><th>البنك (ورمزه)</th><th>IBAN</th><th>الصافي المحول</th><th>توقيع الموظف (للنقدي)</th></tr></thead>
+                <tbody id="bank-report-body">
+                  <tr><td colspan="8" style="text-align:center;">اضغط على توليد الكشف لجلب البيانات</td></tr>
+                </tbody>
+              </table>
+            </div>
+
+            <div style="margin-top: 20px; display: flex; gap: 10px; flex-wrap:wrap;">
+              <button class="btn btn-hr" onclick="generateBankReport()">🔄 توليد كشف الرواتب الشامل</button>
+              <button class="btn btn-emp" onclick="exportBankToEmail()">✉️ تصدير الكشف عبر الإيميل للبنك</button>
+              <button class="btn btn-secondary" onclick="window.print()">🖨️ طباعة الكشف للتوقيع</button>
+            </div>
+          </div>
+
+        </section>
+
+        <!-- التقارير الفردية السرية -->
+        <section id="hr-reports" class="view-section">
+          <div class="card">
+            <div class="card-title">إصدار الكشوفات الفردية السرية للطباعة</div>
+            <div class="grid-3" style="align-items: end;">
+              <div class="form-group">
+                <label>اختر الموظف</label>
+                <select id="report-emp-select" class="input-field" style="margin:0;"></select>
+              </div>
+              <button class="btn btn-hr" onclick="generateReport()">توليد التقرير السري</button>
+              <button class="btn btn-secondary" onclick="window.print()">🖨️ طباعة (PDF)</button>
+            </div>
+
+            <div id="printable-area" style="display: none; border: 1px solid var(--border); padding: 24px; border-radius: 8px; margin-top: 20px; background: #fff;">
+              <h2 style="text-align: center; border-bottom: 2px solid #0f172a; padding-bottom: 10px;">كشف موظف (سري)</h2>
+              <div style="display: flex; justify-content: space-between; background: #f8fafc; padding: 15px; margin-bottom: 20px; font-weight: bold;">
+                <div id="rep-name">الاسم: </div>
+                <div id="rep-id" style="color: var(--primary-hr);">الرقم: </div>
+              </div>
+              <table style="width: 100%;">
+                <tr style="background:#f1f5f9;"><th>التاريخ</th><th>البصمات المسجلة</th><th>الحالة</th></tr>
+                <tr><td>-</td><td>(لا توجد حركات مسجلة حالياً)</td><td>-</td></tr>
+              </table>
+              <div style="margin-top: 40px; display: flex; justify-content: space-between; color: var(--text-muted);">
+                <div>توقيع الـ HR: __________________</div><div>توقيع الموظف: __________________</div>
+              </div>
+            </div>
+          </div>
+        </section>
+      </div>
+    </main>
+  </div>
+
+  <!-- ================= 5. بوابة الموظف (ESS Portal) ================= -->
+  <div id="emp-portal" style="display: none; width: 100%;">
+    <aside>
+      <div class="brand">UTC <span style="color: #34d399;">Employee</span></div>
+      <button class="nav-btn active" onclick="switchTab('emp-dashboard', 'emp', this)">📍 البصمة الذكية</button>
+      <button class="nav-btn" onclick="switchTab('emp-leaves', 'emp', this)">📅 طلبات الإجازات</button>
+    </aside>
+    <main>
+      <header>
+        <div class="header-title-container">
+          <div style="display: flex; align-items: center;">
+            <button class="menu-toggle" onclick="toggleSidebar()">☰</button>
+            <div style="font-weight: 800; font-size: 1.1rem; color: var(--sidebar-emp); white-space: nowrap;">
+              بوابة الموظف: <span id="logged-emp-name-display" style="color: var(--primary-emp);"></span>
+            </div>
+          </div>
+          <button class="btn btn-danger" onclick="logout()">خروج</button>
+        </div>
+        
+        <!-- خانة البحث الشاملة -->
+        <div class="global-search-container">
+          <input type="text" class="global-search-input" placeholder="🔍 بحث عن زميل (الاسم، الرقم)..." onkeyup="performGlobalSearch(this)">
+          <div class="search-results-dropdown"></div>
+        </div>
+      </header>
+      <div class="content-container">
+        
+        <section id="emp-dashboard" class="view-section active">
+          <div class="card" style="text-align: center; max-width: 500px; margin: 0 auto;">
+            <h2 style="margin-bottom: 10px; color: var(--sidebar-emp);">تسجيل الحضور والانصراف</h2>
+            <div class="punch-circle" onclick="alert('تم تسجيل البصمة بنجاح في النظام!')">
+              <div class="clock-display" id="live-clock">00:00:00</div>
+              <div style="font-weight: 700;">اضغط للتبصيم</div>
+            </div>
+            <div style="display: flex; gap: 10px; justify-content: center; margin-top: 20px;">
+              <button class="btn" style="background: #f59e0b; color: white;" onclick="alert('تم بدء الاستراحة')">☕ بدء الغداء</button>
+              <button class="btn" style="background: #10b981; color: white;" onclick="alert('تم العودة للعمل')">✔️ إنهاء الغداء</button>
+            </div>
+          </div>
+        </section>
+
+        <section id="emp-leaves" class="view-section">
+          <div class="card" style="max-width: 600px; margin: 0 auto;">
+            <div class="card-title">تقديم طلب إجازة أو مغادرة</div>
+            <div class="form-group">
+              <label>نوع الطلب</label>
+              <select class="input-field" style="margin:0;"><option>إجازة سنوية</option><option>إجازة مرضية (يلزم تقرير)</option><option>مغادرة</option></select>
+            </div>
+            <div class="grid-2" style="margin-top: 15px;">
+              <div class="form-group"><label>من تاريخ</label><input type="date" class="input-field" style="margin:0;"></div>
+              <div class="form-group"><label>إلى تاريخ</label><input type="date" class="input-field" style="margin:0;"></div>
+            </div>
+            <div class="form-group" style="margin-top: 15px;">
+              <label>المرفق (إن وجد)</label><input type="file" class="input-field" style="margin:0;">
+            </div>
+            <button class="btn btn-emp" style="width: 100%; margin-top: 15px;" onclick="alert('تم إرسال الطلب لمدير الموارد البشرية للموافقة')">إرسال الطلب</button>
+          </div>
+        </section>
+
+      </div>
+    </main>
+  </div>
+
+  <script>
+    // ================= تهيئة قاعدة البيانات المحلية الذكية =================
+    if (!localStorage.getItem('utc_db')) {
+      const initialDB = {
+        licenses: [], transactions: [], activeHRKey: null, globalCounter: 1000, employees: [],
+        settings: { mainDepts: [], subDepts: [], jobTitles: [], banks: [] }
+      };
+      localStorage.setItem('utc_db', JSON.stringify(initialDB));
+    } else {
+      let db = JSON.parse(localStorage.getItem('utc_db'));
+      if(!db.employees) db.employees = [];
+      if(!db.settings) db.settings = { mainDepts: [], subDepts: [], jobTitles: [], banks: [] };
+      if(!db.settings.banks) db.settings.banks = [];
+      localStorage.setItem('utc_db', JSON.stringify(db));
+    }
+
+    function getDB() { return JSON.parse(localStorage.getItem('utc_db')); }
+    function saveDB(db) { localStorage.setItem('utc_db', JSON.stringify(db)); }
+
+    // التحكم بالقائمة الجانبية في الهاتف
+    function toggleSidebar() {
+      document.querySelectorAll('aside').forEach(el => el.classList.toggle('open'));
+      document.getElementById('mobile-overlay').classList.toggle('active');
+    }
+
+    // تحديث الساعة في واجهة الموظف
+    setInterval(() => {
+      const el = document.getElementById('live-clock');
+      if(el) el.innerText = new Date().toLocaleTimeString('ar-EG', {hour12: false});
+    }, 1000);
+
+    // ================= دالة البحث الشاملة (Global Search) =================
+    function performGlobalSearch(inputEl) {
+      const query = inputEl.value.trim().toLowerCase();
+      const dropdown = inputEl.nextElementSibling;
+      
+      if (!query) {
+        dropdown.style.display = 'none';
+        return;
+      }
+      
+      const db = getDB();
+      if (!db.employees) return;
+
+      const results = db.employees.filter(emp => 
+        (emp.name && emp.name.toLowerCase().includes(query)) || 
+        (emp.id && emp.id.toLowerCase().includes(query)) || 
+        (emp.nid && emp.nid.includes(query))
+      );
+      
+      dropdown.innerHTML = '';
+      if (results.length === 0) {
+        dropdown.innerHTML = '<div style="padding:15px; text-align:center; color:#64748b; font-weight:bold;">لا توجد نتائج مطابقة</div>';
+      } else {
+        results.forEach(emp => {
+          let empDetailsStr = `الاسم: ${emp.name}\\nالرقم الوظيفي: ${emp.id}\\nالرقم الوطني: ${emp.nid}\\nالراتب الأساسي: ${emp.salary} د.أ\\nالبنك: ${emp.bank || 'غير محدد'}`;
+          dropdown.innerHTML += `
+            <div class="search-result-item" onclick="alert('${empDetailsStr}')">
+              <div class="search-result-name">${emp.name}</div>
+              <div class="search-result-details">الرقم: ${emp.id} | وطني: ${emp.nid}</div>
+            </div>
+          `;
+        });
+      }
+      dropdown.style.display = 'block';
+    }
+
+    // إخفاء نتائج البحث عند النقر خارجها
+    document.addEventListener('click', function(e) {
+      if (!e.target.classList.contains('global-search-input')) {
+        document.querySelectorAll('.search-results-dropdown').forEach(d => d.style.display = 'none');
+      }
+    });
+
+    // إظهار وإخفاء حقل الجنسية
+    function toggleNationalityOther() {
+      const sel = document.getElementById('emp-nationality').value;
+      const otherInp = document.getElementById('emp-nationality-other');
+      if (sel === 'other') {
+          otherInp.style.display = 'block';
+          otherInp.required = true;
+      } else {
+          otherInp.style.display = 'none';
+          otherInp.required = false;
+      }
+    }
+
+    // حفظ تخصيص الموقع للموظفين
+    function saveGeoLocation() {
+        const empTarget = document.getElementById('geo-emp-select');
+        const targetName = empTarget.options[empTarget.selectedIndex].text;
+        const locName = document.getElementById('geo-name').value;
+        alert(`تم اعتماد الموقع (${locName}) وتخصيصه لـ: ${targetName} بنجاح!`);
+    }
+
+    // ================= 1. تسجيل الدخول الذكي =================
+    function handleLogin(event) {
+      event.preventDefault();
+      const user = document.getElementById('login-user').value.trim();
+      const pass = document.getElementById('login-pass').value;
+
+      document.getElementById('login-error').style.display = 'none';
+
+      // 1. فحص المالك
+      if (user.toLowerCase() === "master" && pass === "1000") { openMasterPortal(); return; }
+      
+      // 2. فحص مدير الـ HR
+      if (user.toLowerCase() === "hr" && pass === "1000") { checkLicenseAndOpen('hr-portal'); return; }
+      
+      // 3. فحص الموظفين (بالرقم السريع أو الرقم الوظيفي وكلمة المرور الخاصة بهم)
+      let db = getDB();
+      let matchedEmp = db.employees.find(e => (e.shortId === user || e.id === user) && e.password === pass);
+      
+      if (matchedEmp) {
+        sessionStorage.setItem('logged_emp_name', matchedEmp.name);
+        checkLicenseAndOpen('emp-portal');
+        return;
+      } else if (user.toLowerCase() === "emp" && pass === "1000") { // دخول تجريبي عام
+        sessionStorage.setItem('logged_emp_name', "موظف تجريبي");
+        checkLicenseAndOpen('emp-portal');
+        return;
+      }
+
+      document.getElementById('login-error').style.display = 'block';
+    }
+
+    function logout() {
+      document.getElementById('login-user').value = ""; document.getElementById('login-pass').value = "";
+      sessionStorage.removeItem('logged_emp_name');
+      document.getElementById('master-portal').style.display = 'none';
+      document.getElementById('hr-portal').style.display = 'none';
+      document.getElementById('emp-portal').style.display = 'none';
+      document.getElementById('activation-screen').style.display = 'none';
+      document.getElementById('login-screen').style.display = 'flex';
+      document.getElementById('app-body').className = '';
+      document.querySelectorAll('.global-search-input').forEach(el => el.value = ''); // تصفير البحث عند الخروج
+      if(window.innerWidth <= 768) {
+          document.querySelectorAll('aside').forEach(el => el.classList.remove('open'));
+          document.getElementById('mobile-overlay').classList.remove('active');
+      }
+    }
+
+    function switchTab(tabId, portalType, btn) {
+      const portal = document.getElementById(`${portalType}-portal`);
+      portal.querySelectorAll('.view-section').forEach(el => el.classList.remove('active'));
+      portal.querySelectorAll('.nav-btn').forEach(el => el.classList.remove('active'));
+      document.getElementById(tabId).classList.add('active');
+      btn.classList.add('active');
+      
+      if(window.innerWidth <= 768) {
+          document.querySelectorAll('aside').forEach(el => el.classList.remove('open'));
+          document.getElementById('mobile-overlay').classList.remove('active');
+      }
+      
+      if(tabId === 'hr-employee') generateEmpId(); 
+    }
+
+    // ================= 2. التفعيل (Licensing) =================
+    function checkLicenseAndOpen(portalId) {
+      const db = getDB();
+      if (db.activeHRKey) {
+        const validLicense = db.licenses.find(l => l.key === db.activeHRKey && l.status === 'active');
+        if(validLicense) { openPortal(portalId, validLicense); return; }
+      }
+      document.getElementById('login-screen').style.display = 'none';
+      document.getElementById('activation-screen').style.display = 'flex';
+      document.getElementById('activation-screen').setAttribute('data-target', portalId);
+    }
+
+    function handleActivation(event) {
+      event.preventDefault();
+      const enteredKey = document.getElementById('license-input').value.trim();
+      const db = getDB();
+      const matched = db.licenses.find(l => l.key === enteredKey && l.status === 'active');
+      
+      if (matched) {
+        db.activeHRKey = enteredKey; saveDB(db);
+        document.getElementById('activation-error').style.display = 'none';
+        document.getElementById('activation-screen').style.display = 'none';
+        openPortal(document.getElementById('activation-screen').getAttribute('data-target') || 'hr-portal', matched);
+      } else { document.getElementById('activation-error').style.display = 'block'; }
+    }
+
+    function openPortal(portalId, licenseData) {
+      document.getElementById('login-screen').style.display = 'none';
+      document.getElementById(portalId).style.display = 'flex';
+      
+      if(portalId === 'hr-portal') {
+        document.getElementById('app-body').className = 'hr-mode';
+        document.getElementById('active-company-name').innerText = `🏢 ${licenseData.company}`;
+        document.getElementById('display-hr-serial').innerText = licenseData.serial;
+        document.getElementById('display-hr-key').innerText = licenseData.key;
+        
+        const passedDays = Math.floor((Date.now() - licenseData.timestamp) / (1000 * 60 * 60 * 24));
+        let remaining = parseInt(licenseData.duration) - passedDays;
+        document.getElementById('hr-countdown-days').innerText = remaining > 0 ? remaining + " يوم" : "منتهية";
+        
+        loadHRData(); loadSettingsData(); 
+      } else if (portalId === 'emp-portal') {
+        document.getElementById('app-body').className = 'emp-mode';
+        document.getElementById('logged-emp-name-display').innerText = sessionStorage.getItem('logged_emp_name') || "الموظف";
+      }
+    }
+
+    // ================= 3. بوابة المالك (Master) =================
+    function openMasterPortal() {
+      document.getElementById('login-screen').style.display = 'none';
+      document.getElementById('master-portal').style.display = 'flex';
+      document.getElementById('app-body').className = 'master-mode';
+      renderLicensesTable(); calculateAndRenderAccounting();
+    }
+
+    function generateAndSaveLicense() {
+      const comp = document.getElementById('new-company-name').value;
+      const dur = document.getElementById('new-license-duration').value;
+      if(!comp) return;
+      let db = getDB(); db.globalCounter++; 
+      const newLicense = {
+        serial: `UTC-V${db.globalCounter}`, company: comp, duration: dur,
+        key: `UTC-${dur}D-${Math.random().toString(36).substring(2,6).toUpperCase()}-${Math.random().toString(36).substring(2,6).toUpperCase()}`,
+        timestamp: Date.now(), date: new Date().toLocaleDateString('ar-EG'), status: 'active'
+      };
+      db.licenses.push(newLicense); saveDB(db);
+      alert(`الرخصة: ${newLicense.key}`); document.getElementById('new-company-name').value = '';
+      renderLicensesTable();
+    }
+
+    function changeLicenseStatus(key, newStatus) {
+      let db = getDB(); let idx = db.licenses.findIndex(l => l.key === key);
+      if(idx > -1) { db.licenses[idx].status = newStatus; saveDB(db); renderLicensesTable(); }
+    }
+
+    function deleteLicense(key) {
+      if(confirm("حذف نهائي؟")) {
+        let db = getDB(); db.licenses = db.licenses.filter(l => l.key !== key);
+        if(db.activeHRKey === key) db.activeHRKey = null;
+        saveDB(db); renderLicensesTable();
+      }
+    }
+
+    function renderLicensesTable() {
+      const db = getDB(); const tbody = document.getElementById('licenses-table-body'); tbody.innerHTML = '';
+      db.licenses.forEach(lic => {
+        let statusHtml = lic.status === 'active' ? `<span class="status-badge" style="background:#dcfce7; color:#166534;">نشط</span>` : 
+                         lic.status === 'paused' ? `<span class="status-badge" style="background:#fef08a; color:#854d0e;">معطل</span>` :
+                         `<span class="status-badge" style="background:#fee2e2; color:#991b1b;">موقوف</span>`;
+        let actionBtns = lic.status === 'active' ? `<button class="btn btn-warning" onclick="changeLicenseStatus('${lic.key}', 'paused')" style="padding:6px; font-size:0.8rem; margin:2px;">تعطيل</button><button class="btn btn-danger" onclick="deleteLicense('${lic.key}')" style="padding:6px; font-size:0.8rem; margin:2px;">حذف</button>` :
+                         `<button class="btn btn-success" onclick="changeLicenseStatus('${lic.key}', 'active')" style="padding:6px; font-size:0.8rem; margin:2px;">تفعيل</button><button class="btn btn-danger" onclick="deleteLicense('${lic.key}')" style="padding:6px; font-size:0.8rem; margin:2px;">حذف</button>`;
+        tbody.innerHTML += `<tr><td><span class="badge-serial">${lic.serial}</span></td><td style="font-weight:bold;">${lic.company}</td><td><span class="badge-code">${lic.key}</span></td><td>${lic.duration}</td><td>${statusHtml}</td><td>${actionBtns}</td></tr>`;
+      });
+    }
+
+    function addTransaction() {
+      let db = getDB();
+      db.transactions.push({
+        id: "VCH-" + Math.floor(Math.random() * 10000),
+        type: document.getElementById('trans-type').value,
+        amount: parseFloat(document.getElementById('trans-amount').value),
+        method: document.getElementById('trans-method').value,
+        desc: document.getElementById('trans-desc').value,
+        date: document.getElementById('trans-date').value
+      });
+      saveDB(db); document.getElementById('trans-amount').value = ''; document.getElementById('trans-desc').value = '';
+      calculateAndRenderAccounting();
+    }
+
+    function calculateAndRenderAccounting() {
+      const db = getDB(); const tbody = document.getElementById('transactions-table-body'); tbody.innerHTML = '';
+      let totalIn = 0, totalOut = 0, receivables = 0;
+      const methods = { "cash": "نقدي", "check": "شيك", "credit": "ذمم" };
+
+      db.transactions.forEach(t => {
+        let amt = parseFloat(t.amount);
+        if (t.type === 'in') { t.method === 'credit' ? receivables += amt : totalIn += amt; } 
+        else if (t.type === 'out') { if (t.method !== 'credit') totalOut += amt; }
+
+        let typeHtml = t.type === 'in' ? `<span class="type-in">قبض (+)</span>` : `<span class="type-out">صرف (-)</span>`;
+        tbody.innerHTML += `<tr><td><span class="badge-code" style="background:#e2e8f0; color:#334155; letter-spacing:0;">${t.id}</span></td><td>${t.date}</td><td>${typeHtml}</td><td style="font-weight:600;">${t.desc}</td><td>${methods[t.method]||'-'}</td><td style="font-weight:800; color:${t.type==='in'?'#166534':'#991b1b'};">${amt.toLocaleString()}</td></tr>`;
+      });
+      
+      let netBal = totalIn - totalOut;
+      document.getElementById('acc-total-in').innerText = totalIn.toLocaleString();
+      document.getElementById('acc-total-out').innerText = totalOut.toLocaleString();
+      document.getElementById('acc-receivables').innerText = receivables.toLocaleString();
+      document.getElementById('acc-net-balance').innerText = netBal.toLocaleString();
+      
+      let taxRate = parseFloat(document.getElementById('master-tax-rate').value) || 0;
+      let taxAmount = netBal > 0 ? netBal * (taxRate / 100) : 0;
+      document.getElementById('acc-final-profit').innerText = (netBal - taxAmount > 0) ? (netBal - taxAmount).toLocaleString() : "0.00";
+    }
+
+    // ================= 4. إعدادات الهيكل (HR) والبنوك المزدوجة =================
+    function addSetting(type) {
+      let db = getDB(); 
+      let val = document.getElementById(`input-${type}`).value.trim();
+      
+      if(type === 'banks') {
+        let code = document.getElementById('input-bank-code').value.trim();
+        if(!val || !code) { alert('أدخل اسم ورمز البنك'); return; }
+        val = `${val} (${code})`; 
+      }
+
+      if(!val) return; 
+      db.settings[type].push(val); saveDB(db);
+      
+      document.getElementById(`input-${type}`).value = '';
+      if(type === 'banks') document.getElementById('input-bank-code').value = '';
+      
+      loadSettingsData();
+    }
+
+    function removeSetting(type, index) { 
+      let db = getDB(); db.settings[type].splice(index, 1); saveDB(db); loadSettingsData(); 
+    }
+
+    function loadSettingsData() {
+      let db = getDB();
+      ['mainDepts', 'subDepts', 'jobTitles', 'banks'].forEach(type => {
+         let html = '';
+         if(db.settings[type]) {
+           db.settings[type].forEach((val, i) => {
+              html += `<div style="display:flex; justify-content:space-between; background:#f1f5f9; padding:8px 12px; margin-bottom:5px; border-radius:6px; align-items:center;"><span style="font-weight:bold; color:var(--sidebar-hr);">${val}</span><button type="button" onclick="removeSetting('${type}', ${i})" style="color:var(--danger); background:none; border:none; cursor:pointer; font-weight:bold;">حذف</button></div>`;
+           });
+         }
+         if(document.getElementById(`list-${type}`)) document.getElementById(`list-${type}`).innerHTML = html;
+      });
+
+      const mSel = document.getElementById('emp-main-dept'); 
+      const sSel = document.getElementById('emp-sub-dept'); 
+      const jSel = document.getElementById('emp-job-title');
+      const bSel = document.getElementById('emp-bank');
+
+      if(mSel) mSel.innerHTML = '<option value="" disabled selected>-- القسم الرئيسي --</option>';
+      if(sSel) sSel.innerHTML = '<option value="" disabled selected>-- القسم الفرعي --</option>';
+      if(jSel) jSel.innerHTML = '<option value="" disabled selected>-- المسمى الوظيفي --</option>';
+      if(bSel) bSel.innerHTML = '<option value="" disabled selected>-- اختر البنك --</option>';
+
+      if(db.settings.mainDepts) db.settings.mainDepts.forEach((val, i) => { if(mSel) mSel.innerHTML += `<option value="${String(i+1).padStart(2, '0')}">${val}</option>`; });
+      if(db.settings.subDepts) db.settings.subDepts.forEach((val, i) => { if(sSel) sSel.innerHTML += `<option value="${String(i+1).padStart(2, '0')}">${val}</option>`; });
+      if(db.settings.jobTitles) db.settings.jobTitles.forEach((val) => { if(jSel) jSel.innerHTML += `<option value="${val}">${val}</option>`; });
+      if(db.settings.banks) db.settings.banks.forEach((val) => { if(bSel) bSel.innerHTML += `<option value="${val}">${val}</option>`; });
+
+      generateEmpId(); 
+    }
+
+    // ================= 5. إدارة الموظفين والرواتب (HR) =================
+    function toggleBankDetails() {
+      let method = document.getElementById('emp-payment-method').value;
+      let bankEl = document.getElementById('emp-bank');
+      let ibanEl = document.getElementById('emp-iban');
+      if(method === 'bank') {
+        bankEl.required = true; ibanEl.required = true;
+        bankEl.disabled = false; ibanEl.disabled = false;
+      } else {
+        bankEl.required = false; ibanEl.required = false;
+        bankEl.disabled = true; ibanEl.disabled = true;
+        bankEl.value = ''; ibanEl.value = '';
+      }
+    }
+
+    // العداد التسلسلي الذكي للموظفين
+    function generateEmpId() {
+      const main = document.getElementById('emp-main-dept');
+      const sub = document.getElementById('emp-sub-dept');
+      if(main && sub) {
+        let mVal = main.value || '00';
+        let sVal = sub.value || '00';
+        let db = getDB();
+        
+        let empCount = (db.employees ? db.employees.length : 0) + 1;
+        let serialStr = String(empCount).padStart(3, '0');
+        
+        document.getElementById('emp-id').value = `UTC-${mVal}${sVal}-${serialStr}`;
+        
+        // توليد رقم سريع وتعبئته إذا كانت الخانة فارغة 
+        let shortIdInput = document.getElementById('emp-short-id');
+        if (!shortIdInput.value) {
+            let random = Math.floor(1000 + Math.random() * 9000); 
+            shortIdInput.value = `${random}`;
+        }
+      }
+    }
+
+    function calculateAge() {
+      const dobInput = document.getElementById('emp-dob').value;
+      if (!dobInput) return;
+      const birthDate = new Date(dobInput);
+      let age = new Date().getFullYear() - birthDate.getFullYear();
+      document.getElementById('age-display').value = `${age} سنة`;
+    }
+
+    function saveNewEmployee(e) {
+      e.preventDefault();
+      if(!document.getElementById('emp-main-dept').value || !document.getElementById('emp-payment-method').value) { 
+        alert("تأكد من اختيار الأقسام وطريقة الدفع!"); return; 
+      }
+
+      let db = getDB();
+      let shortIdVal = document.getElementById('emp-short-id').value.trim();
+
+      // حماية لمنع تكرار رقم الدخول السريع
+      let isShortIdExists = db.employees.some(emp => emp.shortId === shortIdVal);
+      if(isShortIdExists) {
+        alert("⚠️ عذراً، رقم الدخول السريع (" + shortIdVal + ") مستخدم مسبقاً لموظف آخر. يرجى إدخال رقم مختلف.");
+        return; 
+      }
+      
+      let nationalityVal = document.getElementById('emp-nationality').value;
+      if(nationalityVal === 'other') {
+          nationalityVal = document.getElementById('emp-nationality-other').value.trim();
+      }
+
+      const newEmp = {
+        id: document.getElementById('emp-id').value, 
+        shortId: shortIdVal,
+        password: document.getElementById('emp-pass').value,
+        name: `${document.getElementById('emp-name-ar1').value} ${document.getElementById('emp-name-ar2').value} ${document.getElementById('emp-name-ar3').value}`.trim(),
+        nid: document.getElementById('emp-nid').value,
+        nationality: nationalityVal,
+        gender: document.getElementById('emp-gender').value,
+        dob: document.getElementById('emp-dob').value,
+        residence: document.getElementById('emp-residence').value,
+        phone: document.getElementById('emp-phone').value,
+        email: document.getElementById('emp-email').value,
+        jobTitle: document.getElementById('emp-job-title').value || '-',
+        salary: parseFloat(document.getElementById('emp-salary').value) || 0,
+        allowance: parseFloat(document.getElementById('emp-allowance').value) || 0,
+        paymentMethod: document.getElementById('emp-payment-method').value,
+        bank: document.getElementById('emp-bank').value || '',
+        iban: document.getElementById('emp-iban').value || '',
+        empSsn: document.getElementById('emp-ssn').value,
+        compSsn: document.getElementById('emp-comp-ssn').value,
+        ssRate: parseFloat(document.getElementById('emp-ss-rate').value) || 7.5
+      };
+      
+      db.employees.push(newEmp); saveDB(db);
+      alert('تم حفظ واعتماد الموظف. يستطيع الآن الدخول لتبصيم الدوام برقمه السريع!');
+      e.target.reset(); 
+      document.getElementById('emp-short-id').value = ''; 
+      generateEmpId(); 
+      loadHRData(); 
+    }
+
+    function loadHRData() {
+      const db = getDB();
+      document.getElementById('stat-total-emp').innerText = db.employees.length;
+      document.getElementById('stat-total-salary').innerText = db.employees.reduce((sum, emp) => sum + emp.salary + emp.allowance, 0).toLocaleString();
+
+      const tbody = document.getElementById('employees-table-body'); tbody.innerHTML = '';
+      db.employees.forEach(emp => {
+        let methodText = emp.paymentMethod === 'bank' ? 'بنكي' : (emp.paymentMethod === 'cash' ? 'نقداً' : 'شيك');
+        tbody.innerHTML += `<tr><td><span class="badge-code" style="background:#e2e8f0; color:#334155;">${emp.id}</span><br><span style="font-size:0.8rem; color:var(--primary-emp); font-weight:bold;">دخول: ${emp.shortId}</span></td><td style="font-weight:bold;">${emp.name}</td><td><span class="status-badge" style="background:#f1f5f9; color:#0f172a;">${methodText}</span></td><td>${emp.bank || '-'}</td><td style="font-family:monospace;">${emp.iban || '-'}</td><td>${emp.salary}</td></tr>`;
+      });
+
+      const pSel = document.getElementById('payroll-emp-select'); const rSel = document.getElementById('report-emp-select');
+      pSel.innerHTML = '<option value="" disabled selected>-- اختر الموظف --</option>'; rSel.innerHTML = '<option value="" disabled selected>-- اختر الموظف --</option>';
+      
+      const geoSelect = document.getElementById('geo-emp-select');
+      if(geoSelect) geoSelect.innerHTML = '<option value="all">جميع الموظفين (عام)</option>';
+
+      db.employees.forEach(emp => {
+        const opt = `<option value="${emp.id}">${emp.name} (${emp.id})</option>`;
+        pSel.innerHTML += opt; rSel.innerHTML += opt;
+        if(geoSelect) geoSelect.innerHTML += opt;
+      });
+    }
+
+    // محرك الرواتب
+    function loadEmpPayrollData() {
+      const db = getDB();
+      const emp = db.employees.find(e => e.id === document.getElementById('payroll-emp-select').value);
+      if(emp) {
+        document.getElementById('pay-basic').value = emp.salary;
+        document.getElementById('pay-allowance').value = emp.allowance;
+        document.getElementById('pay-ss-rate').value = emp.ssRate;
+        calcPay(); 
+      }
+    }
+
+    function calcPay() {
+      let b = parseFloat(document.getElementById('pay-basic').value) || 0;
+      let a = parseFloat(document.getElementById('pay-allowance').value) || 0;
+      let ssRate = parseFloat(document.getElementById('pay-ss-rate').value) || 0;
+      let compSsRate = parseFloat(document.getElementById('pay-comp-ss-rate').value) || 0;
+      let taxRate = parseFloat(document.getElementById('pay-tax-rate').value) || 0;
+      
+      let gross = b + a;
+      document.getElementById('pay-gross').value = gross.toFixed(2);
+      let hRate = (gross / 30) / 8;
+      
+      let ssEmpAmt = gross * (ssRate/100);
+      let ssCompAmt = gross * (compSsRate/100);
+      let taxAmt = gross * (taxRate/100);
+
+      document.getElementById('pay-ss-emp-amt').value = ssEmpAmt.toFixed(2);
+      document.getElementById('pay-comp-ss-amt').value = ssCompAmt.toFixed(2);
+      document.getElementById('pay-tax-amt').value = taxAmt.toFixed(2);
+      
+      let dHrs = parseFloat(document.getElementById('pay-delay').value) || 0;
+      let lBal = parseFloat(document.getElementById('pay-leave-bal').value) || 0;
+      let dDays = dHrs / 8;
+      
+      let leaveDed = 0; let salDed = 0;
+      if (dDays <= lBal) { leaveDed = dDays; } 
+      else { leaveDed = lBal; salDed = ((dDays - lBal) * 8) * hRate; }
+
+      document.getElementById('pay-leave-deduct').value = leaveDed.toFixed(2);
+      document.getElementById('pay-delay-amt').value = salDed.toFixed(2);
+      
+      let discAmt = (parseFloat(document.getElementById('pay-disc').value) || 0) * (gross / 30);
+      let adv = parseFloat(document.getElementById('pay-advance').value) || 0;
+
+      let totalDed = ssEmpAmt + taxAmt + salDed + discAmt + adv;
+      let net = gross - totalDed;
+
+      document.getElementById('res-gross').innerText = gross.toFixed(2);
+      document.getElementById('res-deduct').innerText = totalDed.toFixed(2);
+      document.getElementById('res-net').innerText = net > 0 ? net.toFixed(2) : "0.00";
+    }
+
+    // ================= 6. تصدير البنوك والتسليم =================
+    function generateBankReport() {
+      const db = getDB();
+      const tbody = document.getElementById('bank-report-body');
+      tbody.innerHTML = '';
+      
+      if(db.employees.length === 0) {
+        tbody.innerHTML = '<tr><td colspan="8" style="text-align:center;">لا يوجد موظفين مسجلين</td></tr>';
+        return;
+      }
+
+      db.employees.forEach((emp, index) => {
+        let gross = (emp.salary || 0) + (emp.allowance || 0);
+        let ssAmt = gross * ((emp.ssRate || 7.5)/100);
+        let taxAmt = gross * 0.02; // ضريبة قياسية للتصدير السريع
+        let net = gross - ssAmt - taxAmt;
+        
+        let payMethodText = emp.paymentMethod === 'cash' ? 'نقداً' : (emp.paymentMethod === 'check' ? 'شيك' : 'تحويل بنكي');
+        let signature = emp.paymentMethod === 'bank' ? '-' : '_________________';
+
+        tbody.innerHTML += `<tr>
+          <td>${index + 1}</td>
+          <td style="font-weight:bold;">${emp.name}</td>
+          <td>${emp.id}</td>
+          <td><span class="status-badge" style="background:#f1f5f9; color:#0f172a;">${payMethodText}</span></td>
+          <td>${emp.bank || '-'}</td>
+          <td style="font-family:monospace;">${emp.iban || '-'}</td>
+          <td style="color:var(--accent); font-weight:bold; font-size:1.1rem;">${net.toFixed(2)} د.أ</td>
+          <td style="color:var(--text-muted);">${signature}</td>
+        </tr>`;
+      });
+    }
+
+    function exportBankToEmail() {
+      const db = getDB();
+      if(db.employees.length === 0) { alert('لا يوجد بيانات للتصدير.'); return; }
+
+      let emailBody = "السادة البنك المحترمين،\n\nنرفق لكم كشف رواتب الموظفين المعتمد للتحويل:\n\n";
+      
+      db.employees.forEach((emp, index) => {
+        if(emp.paymentMethod === 'bank') { 
+          let gross = (emp.salary || 0) + (emp.allowance || 0);
+          let ssAmt = gross * ((emp.ssRate || 7.5)/100);
+          let taxAmt = gross * 0.02; 
+          let net = gross - ssAmt - taxAmt;
+          
+          emailBody += `${index + 1}. الاسم: ${emp.name} | البنك: ${emp.bank} | IBAN: ${emp.iban} | الصافي: ${net.toFixed(2)} د.أ\n`;
+        }
+      });
+
+      emailBody += "\nشاكرين تعاونكم.\nإدارة الموارد البشرية.";
+      const encodedBody = encodeURIComponent(emailBody);
+      window.location.href = `mailto:?subject=كشف تحويل رواتب الموظفين (معتمد)&body=${encodedBody}`;
+    }
+
+    function generateReport() {
+      const sel = document.getElementById('report-emp-select');
+      if(!sel.value) { alert("اختر موظف!"); return; }
+      const text = sel.options[sel.selectedIndex].text;
+      document.getElementById('rep-name').innerText = "الاسم: " + text.split(' (')[0];
+      document.getElementById('rep-id').innerText = "الرقم: " + text.split(' (')[1].replace(')','');
+      document.getElementById('printable-area').style.display = 'block';
+    }
+  </script>
+</body>
+</html>
